@@ -6,10 +6,6 @@
           CSV
         </div>
         <div class="panel-body">
-          <div class="col-md-offset-3 col-md-2">
-            <button ng-click="csv()" class="form-control btn btn-info">Generate Full CSV</button>
-          </div>
-         
           <div class="spin" ng-show='spinner'>
             <i class="fa fa-spinner fa-spin"></i>
             <br>
@@ -86,5 +82,17 @@
           </div>
         </div>
       </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Export All CSV
+      </div>
+      <div class="panel-body">
+        <button ng-click="csv(1)" class="form-control btn btn-info" ng-disabled="spinner">Generate Part 1</button>
+        <button ng-click="csv(2)" class="form-control btn btn-info" ng-disabled="spinner">Generate Part 2</button>
+        <button ng-click="csv(3)" class="form-control btn btn-info" ng-disabled="spinner">Generate Part 3</button>
+        <button ng-click="csv(4)" class="form-control btn btn-info" ng-disabled="spinner">Generate Part 4</button>
+        <button ng-click="csv(5)" class="form-control btn btn-info" ng-disabled="spinner">Generate Part 5</button>
+      </div>
     </div>
+  </div>
 </section>

@@ -138,292 +138,314 @@ ApplicationConfiguration.registerModule('template');
 'use strict';
 
 // Use Applicaion configuration module to register a new module
-ApplicationConfiguration.registerModule('users', ['core']);
+ApplicationConfiguration.registerModule('users', ['core', 'ui.bootstrap']);
 ApplicationConfiguration.registerModule('users.admin', ['core.admin']);
 ApplicationConfiguration.registerModule('users.admin.routes', ['core.admin.routes']);
 
 'use strict';
 // Configuring the Articles module
-angular.module('articles',['ngDialog','ui.mask','ngMaterial','ngAnimate','ngAria','toastr','daterangepicker','angular.filter','ui.bootstrap','mdPickers','isteven-multi-select','textAngular','ngclipboard']).run(['Menus',
-  function (Menus) {
+angular.module('articles', ['ngDialog', 'ui.mask', 'ngMaterial', 'ngAnimate', 'ngAria', 'toastr', 'daterangepicker', 'angular.filter', 'ui.bootstrap', 'mdPickers', 'isteven-multi-select', 'textAngular', 'ngclipboard', 'froala'])
+  .run(['Menus', function(Menus) {
     // Add the articles dropdown item
     Menus.addMenuItem('topbar', {
       title: 'Claimants Management Center',
       state: 'articles',
       type: 'dropdown',
-      roles: ['user','admin']
+      roles: ['user', 'user2', 'admin1', 'admin2', 'admin']
     });
-    
+
 
     // Add the dropdown list item
     Menus.addSubMenuItem('topbar', 'articles', {
       title: 'Search',
-      state: 'articles.list'
+      state: 'articles.list',
+      roles: ['user', 'user2', 'admin2', 'admin']
     });
-    
+
     Menus.addSubMenuItem('topbar', 'articles', {
       title: 'Bulk Edit',
-      state: 'articles.bulk'
+      state: 'articles.bulk',
+      roles: ['admin1', 'admin2', 'admin']
     });
 
     // Add the dropdown create item
     Menus.addSubMenuItem('topbar', 'articles', {
       title: 'Add New Claimants',
       state: 'articles.create',
-      roles: ['admin']
+      roles: ['admin1', 'admin2', 'admin']
     });
-    
+
     // Add the edit fields
     Menus.addSubMenuItem('topbar', 'articles', {
       title: 'Edit Fields',
       state: 'articles.fields',
-      roles: ['admin']
+      roles: ['admin1', 'admin2', 'admin']
     });
-  }
-]);
+  }]);
 
 // add uiSwitch to module
- angular.module('articles').service('fileUpload', ['$http', function ($http) {
-    this.uploadFileToUrl = function(data_, file, uploadUrl,cb){
-        var fd = new FormData();
-        fd.append('file', file);
-        fd.append('address', data_);
+angular.module('articles').service('fileUpload', ['$http', function($http) {
+  this.uploadFileToUrl = function(data_, file, uploadUrl, cb) {
+    var fd = new FormData();
+    fd.append('file', file);
+    fd.append('address', data_);
 
-        $http.post(uploadUrl, fd, {
-            transformRequest: angular.identity,
-            headers: {'Content-Type': undefined}//, 'enctype':'multipart/form-data'}
-        })
-        .success(function(data){
-            cb(data);
-        })
-        .error(function(err){
-            console.log(err);
-        });
-    };
-}]);
-
-
- angular.module('articles')
-.directive('myDraggable', ['$document','$http', function($document,$http) {
-  return {
-    restrict: 'A',
-      scope: {
-        article : '=article'
-    },
-    templateUrl: '/modules/articles/client/views/side.client.view.html',
-    link: function(scope, element, attr) {
-      var startX = 0, startY = 0, x = 0, y = 0;
-      //Fields();
-      scope.cats = [];
-      if(!scope.fields)
-        getFields();
-      scope.$watch('article', function(newValue, oldValue){
-        $http.get('/api/articles/'+newValue).
-        then(function(response) {
-            scope.article_sort = sortFields(response.data);
-        });
+    $http.post(uploadUrl, fd, {
+        transformRequest: angular.identity,
+        headers: { 'Content-Type': undefined } //, 'enctype':'multipart/form-data'}
+      })
+      .success(function(data) {
+        cb(data);
+      })
+      .error(function(err) {
+        console.log(err);
       });
-      
-        
-    function getFields(){
-      $http.get('/api/fields/all-fields').
-        then(function(response) {
-          //console.log(response.data);
-          scope.fields  = response.data;
-          scope.requiredFileds = [];
-          scope.otherFileds = [];
-          
-          for(var k in scope.fields){
-            if(k === "_id" || k === "user")
-              continue;
-            if(scope.fields[k].category === "Contact"){
-              scope.requiredFileds.push(scope.fields[k]);
-            }
-            else
-              scope.otherFileds.push(scope.fields[k]);
-          }
-          
-          for(var j in response.data){
-             var found = false;
-             for(var i in scope.cats){
-               if(scope.cats[i] === response.data[j].category)
-                 found = true;
-             }
-             if(found === false)
-               scope.cats.push(response.data[j].category);
-           }
-
-          
-        }, function(response) {
-          scope.data = response.data || "Request failed";
-        }
-        
-        ); 
-    };
-    function sortFields(input){
-        var array = [];
-        var other_arr = [];
-        for(var objectKey in input) {
-            if(objectKey !== undefined && angular.isObject(input[objectKey]) && objectKey !== "permissions" && objectKey !== "legacy")
-                array.push(input[objectKey]);
-              else
-                other_arr.push(input[objectKey]);
-        }
-          
-        array.sort(function(a, b){
-            //var aPos = parseInt(a.id.order);
-            //var bPos = parseInt(b.id.order);
-            if(a.id === null || b.id === null)
-              return 0;
-             return a.id.order - b.id.order;  
-        });
-        return array;
-    }
-      element.css({
-       position: 'relative',
-       cursor: 'pointer',
-      });
-
-      element.on('mousedown', function(event) {
-        // Prevent default dragging of selected content
-        event.preventDefault();
-        startX = event.pageX - x;
-        startY = event.pageY - y;
-        $document.on('mousemove', mousemove);
-        $document.on('mouseup', mouseup);
-      });
-
-      function mousemove(event) {
-        y = event.pageY - startY;
-        x = event.pageX - startX;
-        element.css({
-          top: y + 'px',
-          left:  x + 'px'
-        });
-      }
-
-      function mouseup() {
-        $document.off('mousemove', mousemove);
-        $document.off('mouseup', mouseup);
-      }
-    }
   };
 }]);
 
- angular.module('articles').service('fileUpload', ['$http', function ($http) {
-    this.uploadFileToUrl = function(data_, file, uploadUrl,cb){
-        var fd = new FormData();
-        fd.append('file', file);
-        fd.append('address', data_);
+angular.module('articles').value('froalaConfig', {
+  toolbarInline: false,
+  placeholderText: 'Enter Text Here'
+});
 
-        $http.post(uploadUrl, fd, {
-            transformRequest: angular.identity,
-            headers: {'Content-Type': undefined}//, 'enctype':'multipart/form-data'}
-        })
-        .success(function(data){
-            cb(data);
-        })
-        .error(function(err){
-            console.log(err);
+
+angular.module('articles')
+  .directive('myDraggable', ['$document', '$http', function($document, $http) {
+    return {
+      restrict: 'A',
+      scope: {
+        article: '=article'
+      },
+      templateUrl: '/modules/articles/client/views/side.client.view.html',
+      link: function(scope, element, attr) {
+        var startX = 0,
+          startY = 0,
+          x = 0,
+          y = 0;
+        //Fields();
+        scope.cats = [];
+        if (!scope.fields)
+          getFields();
+        scope.$watch('article', function(newValue, oldValue) {
+          $http.get('/api/articles/' + newValue).
+          then(function(response) {
+            scope.article_sort = sortFields(response.data);
+          });
         });
+
+
+        function getFields() {
+          $http.get('/api/fields/all-fields').
+          then(function(response) {
+              //console.log(response.data);
+              scope.fields = response.data;
+              scope.requiredFileds = [];
+              scope.otherFileds = [];
+
+              for (var k in scope.fields) {
+                if (k === "_id" || k === "user")
+                  continue;
+                if (scope.fields[k].category === "Contact") {
+                  scope.requiredFileds.push(scope.fields[k]);
+                } else
+                  scope.otherFileds.push(scope.fields[k]);
+              }
+
+              for (var j in response.data) {
+                var found = false;
+                for (var i in scope.cats) {
+                  if (scope.cats[i] === response.data[j].category)
+                    found = true;
+                }
+                if (found === false)
+                  scope.cats.push(response.data[j].category);
+              }
+
+
+            }, function(response) {
+              scope.data = response.data || "Request failed";
+            }
+
+          );
+        };
+
+        function sortFields(input) {
+          var array = [];
+          var other_arr = [];
+          for (var objectKey in input) {
+            if (objectKey !== undefined && angular.isObject(input[objectKey]) && objectKey !== "permissions" && objectKey !== "legacy")
+              array.push(input[objectKey]);
+            else
+              other_arr.push(input[objectKey]);
+          }
+
+          array.sort(function(a, b) {
+            //var aPos = parseInt(a.id.order);
+            //var bPos = parseInt(b.id.order);
+            if (a.id === null || b.id === null)
+              return 0;
+            return a.id.order - b.id.order;
+          });
+          return array;
+        }
+        element.css({
+          position: 'relative',
+          cursor: 'pointer',
+        });
+
+        element.on('mousedown', function(event) {
+          // Prevent default dragging of selected content
+          event.preventDefault();
+          startX = event.pageX - x;
+          startY = event.pageY - y;
+          $document.on('mousemove', mousemove);
+          $document.on('mouseup', mouseup);
+        });
+
+        function mousemove(event) {
+          y = event.pageY - startY;
+          x = event.pageX - startX;
+          element.css({
+            top: y + 'px',
+            left: x + 'px'
+          });
+        }
+
+        function mouseup() {
+          $document.off('mousemove', mousemove);
+          $document.off('mouseup', mouseup);
+        }
+      }
     };
+  }]);
+
+angular.module('articles').service('fileUpload', ['$http', function($http) {
+  this.uploadFileToUrl = function(data_, file, uploadUrl, cb) {
+    var fd = new FormData();
+    fd.append('file', file);
+    fd.append('address', data_);
+
+    $http.post(uploadUrl, fd, {
+        transformRequest: angular.identity,
+        headers: { 'Content-Type': undefined } //, 'enctype':'multipart/form-data'}
+      })
+      .success(function(data) {
+        cb(data);
+      })
+      .error(function(err) {
+        console.log(err);
+      });
+  };
 }]);
 
 
- angular.module('articles')
-.directive('addNote', ['$document','$http','FileUploader','toastr','$rootScope', function($document,$http, FileUploader, toastr, $rootScope) {
-  return {
-    restrict: 'A',
+angular.module('articles')
+  .directive('addNote', ['$document', '$http', 'FileUploader', 'toastr', '$rootScope', function($document, $http, FileUploader, toastr, $rootScope) {
+    return {
+      restrict: 'A',
       scope: {
-        article : '=article'
-    },
-    templateUrl: '/modules/articles/client/views/addNote.client.view.html',
-    link: function(scope, element, attr) {
-      var startX = 0, startY = 0, x = 0, y = 0;
-      scope.cats = [];
-      scope.newNote = {};
-      scope.newNote.filesShow = [];
-      scope.newNote.files = [];
-      scope.$watch('article', function(newValue, oldValue){
+        article: '=article'
+      },
+      templateUrl: '/modules/articles/client/views/addNote.client.view.html',
+      link: function(scope, element, attr) {
+        var startX = 0,
+          startY = 0,
+          x = 0,
+          y = 0;
+        scope.cats = [];
+        scope.newNote = {
+          files: [],
+          filesShow: [],
+          date: new Date(),
+          //followup: new Date(),
+          RTWregpermFocusInformation: new Date(),
+          RTWtransFocusInformation: new Date()
+        };
+
+        scope.froalaOptions = {
+          toolbarButtons: ['undo', 'redo', '|', 'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'outdent', 'indent', 'clearFormatting', 'insertTable', 'html'],
+          toolbarButtonsXS: ['undo', 'redo', '-', 'bold', 'italic', 'underline'],
+          key: 'md1hkC-11ydbdmcE-13dvD1wzF-7=='
+        };
+
+        scope.$watch('article', function(newValue, oldValue) {
           console.log(newValue);
-        $http.get('/api/articles/'+newValue).
-        then(function(response) {
+          $http.get('/api/articles/' + newValue).
+          then(function(response) {
             scope.file = response.data;
+          });
         });
-      });
-      
-       scope.uploader = new FileUploader({
-        url: "/api/dropdpc/uploadfile",
-        alias: 'uploadFile'
-      });
-            
-      scope.uploader.onAfterAddingFile = function() {
-        scope.loadFile = true;
-        scope.uploader.uploadAll();
-      };
-      
-      scope.uploader.onSuccessItem = function(fileItem, response, status, headers) {
-        console.log(response);
-        scope.loadFile = false;
-        if(status === 200){
+
+        scope.uploader = new FileUploader({
+          url: "/api/dropdpc/uploadfile",
+          alias: 'uploadFile'
+        });
+
+        scope.uploader.onAfterAddingFile = function() {
+          scope.loadFile = true;
+          scope.uploader.uploadAll();
+        };
+
+        scope.uploader.onSuccessItem = function(fileItem, response, status, headers) {
+          console.log(response);
+          scope.loadFile = false;
+          if (status === 200) {
             toastr.success('File upload success');
             scope.newNote.filesShow.push(response);
             scope.newNote.files.push(response._id);
             scope.loadSuccess = true;
-        }
-        else
-          toastr.warning('Error file upload');
-      };
-      
-      scope.getUsers = function(){
-        $http.get('/api/users').
-        then(function(response) {
-          scope.users = response.data;    
-          console.log(response);
-        }, function(response) {
-        }
-        
-        ); 
-    };
-    scope.getUsers();
-    
-    scope.onFileNote = function(re){
-      console.log(re.file);
-      if(!re.file)
-        return;
-      scope.newNote.filesShow.push(re.file);
-      scope.newNote.files.push(re.file._id);
-    };
-      
-    scope.addNote = function(isValid){
-        //console.log("add note");
-        /*if (!isValid) {
-          scope.$broadcast('show-errors-check-validity', 'articleForm');
-          return false;
-        }*/
-        scope.error = null;
-        var date = new Date(scope.newNote.date);
-        var followupdate = new Date(scope.newNote.followup);
-        date.setUTCHours(12,0,0,0);
-        followupdate.setUTCHours(12,0,0,0);    
-        var note = {
-          date    : date,
-          article : scope.article._id,
-          content : scope.newNote.text,
-          type    : scope.newNote.type,
-          title   : scope.newNote.title,
-          _case   : scope.file._id,
-          files   : scope.newNote.files,
-          followUp : followupdate,
-          assign  : scope.newNote.assign
+          } else
+            toastr.warning('Error file upload');
         };
 
+        scope.getUsers = function() {
+          $http.get('/api/users')
+            .then(function(response) {
+                scope.users = response.data;
+                console.log(response);
+              }, function(response) {}
 
-        if(scope.loadFile){
-          toastr.warning('Uploading file...');
-          return;
-        }
-        $http.post('/api/articles/note', note).
+            );
+        };
+        scope.getUsers();
+
+        scope.onFileNote = function(re) {
+          console.log(re.file);
+          if (!re.file)
+            return;
+          scope.newNote.filesShow.push(re.file);
+          scope.newNote.files.push(re.file._id);
+        };
+
+        scope.addNote = function(isValid) {
+          //console.log("add note");
+          /*if (!isValid) {
+            scope.$broadcast('show-errors-check-validity', 'articleForm');
+            return false;
+          }*/
+          scope.error = null;
+          var date = new Date(scope.newNote.date);
+          var followupdate = new Date(scope.newNote.followup);
+          date.setUTCHours(12, 0, 0, 0);
+          followupdate.setUTCHours(12, 0, 0, 0);
+          var note = {
+            date: date,
+            article: scope.article._id,
+            content: scope.newNote.text,
+            type: scope.newNote.type,
+            title: scope.newNote.title,
+            _case: scope.file._id,
+            files: scope.newNote.files,
+            followUp: followupdate,
+            assign: scope.newNote.assign
+          };
+
+
+          if (scope.loadFile) {
+            toastr.warning('Uploading file...');
+            return;
+          }
+          $http.post('/api/articles/note', note).
           then(function(response) {
             console.log(response);
             toastr.success('New note Saved');
@@ -433,49 +455,49 @@ angular.module('articles',['ngDialog','ui.mask','ngMaterial','ngAnimate','ngAria
             scope.loadSuccess = false;
             scope.newNote.filesShow = [];
             scope.file = {};
-            for(var k in response.data.files){
+            for (var k in response.data.files) {
               scope.files.push(response.data.files[k]);
             }
-            if(note.type === "closing"){
+            if (note.type === "closing") {
               closeFile();
             }
           }, function(response) {
             scope.data = response.data || "Request failed";
             toastr.error('Error adding new note');
-          }
-          ); 
-      };
+          });
+        };
 
-      element.css({
-       position: 'relative',
-       cursor: 'pointer',
-      });
-      var myEl = angular.element( document.querySelector( '#some-id' ) );
-      myEl.on('mousedown', function(event) {
-        // Prevent default dragging of selected content
-        event.preventDefault();
-        startX = event.pageX - x;
-        startY = event.pageY - y;
-        $document.on('mousemove', mousemove);
-        $document.on('mouseup', mouseup);
-      });
-
-      function mousemove(event) {
-        y = event.pageY - startY;
-        x = event.pageX - startX;
         element.css({
-          top: y + 'px',
-          left:  x + 'px'
+          position: 'relative',
+          cursor: 'pointer',
+          zIndex: 8888,
         });
-      }
+        var myEl = angular.element(document.querySelector('#some-id'));
+        myEl.on('mousedown', function(event) {
+          // Prevent default dragging of selected content
+          event.preventDefault();
+          startX = event.pageX - x;
+          startY = event.pageY - y;
+          $document.on('mousemove', mousemove);
+          $document.on('mouseup', mouseup);
+        });
 
-      function mouseup() {
-        $document.off('mousemove', mousemove);
-        $document.off('mouseup', mouseup);
+        function mousemove(event) {
+          y = event.pageY - startY;
+          x = event.pageX - startX;
+          element.css({
+            top: y + 'px',
+            left: x + 'px'
+          });
+        }
+
+        function mouseup() {
+          $document.off('mousemove', mousemove);
+          $document.off('mouseup', mouseup);
+        }
       }
-    }
-  };
-}]);
+    };
+  }]);
 
 'use strict';
 
@@ -491,27 +513,30 @@ angular.module('articles').config(['$stateProvider',
       })
       .state('articles.list', {
         templateUrl: 'modules/articles/client/views/list-articles.client.view.html',
-        url: '/list'
+        url: '/list',
+        data: {
+          roles: ['user', 'user2', 'admin2', 'admin']
+        }
       })
       .state('articles.create', {
         url: '/create',
         templateUrl: 'modules/articles/client/views/create-article.client.view.html',
         data: {
-          roles: ['user', 'admin']
+          roles: ['admin1', 'admin2', 'admin']
         }
       })
       .state('articles.fields', {
         url: '/fields',
         templateUrl: 'modules/articles/client/views/edit-fields.client.view.html',
         data: {
-          roles: [ 'admin']
+          roles: [ 'admin1', 'admin2', 'admin']
         }
       })
       .state('articles.bulk', {
         url: '/bulk',
         templateUrl: 'modules/articles/client/views/bulk.client.view.html',
         data: {
-          roles: [ 'admin']
+          roles: [ 'admin1', 'admin2', 'admin']
         }
       });
   }
@@ -520,418 +545,447 @@ angular.module('articles').config(['$stateProvider',
 'use strict';
 
 // Articles controller
-angular.module('articles').controller('articleActionController', ['$scope', '$location', 'Articles','$http', 'Authentication','FileUploader','toastr','$filter','$window','ngDialog','fileUpload','$sce', '$rootScope',
-  function($scope, $location, Articles, $http, Authentication, FileUploader,toastr, $filter, $window, ngDialog, fileUpload, $sce, $rootScope){
-      $scope.article = $scope.ngDialogData.article;
-      $scope.fields = $scope.ngDialogData.fields;
-      $scope.cats = $scope.ngDialogData.cats;
-      $scope.users = $scope.ngDialogData.users;
-      $scope.loadFile = false;
-      $scope.loadSuccess = false;
-      $scope.editDoc = null;
-      $scope.notes = [];
-      $scope.authentication = Authentication;
-      $scope.sortType = 'date';
-      $scope.emailAttachment = [];
-      $scope.newNote = {};
-      $scope.editNote = {};
-      $scope.newNote.files = [];
-      $scope.newNote.filesShow = [];
-      $scope.editNote.files = [];
-      $scope.dropdoc = {};
-      $scope.dropdoc.perPage = 8;
-      $scope.dropdoc.n;
-      $scope.dropdoc.search = false;
-      $scope.allFiles = [];
-      $scope.dropdoc.sortType = 'date';
-      $scope.dropdoc.sortReverse = true;
-      $scope.date = new Date();
-      $scope.calculator = {};
-      $scope.isLegacy = false;
-      $scope.loading = false;
-      $scope.confirmLegacy = "";
-      $scope.permissions = [];
-      var fileAction = "";
-      var uploadType = {};
-      console.log("users: " , $scope.users);
-      $scope.uploaderDoc = new FileUploader({
-        url: '/api/exports/renderDoc/'+$scope.article._id,
-        alias: 'docRender',
-        responseType: 'buffer',
-        removeAfterUpload: true
-        //headers: {'responseType':'buffer'}
-      });
-      console.log($scope.authentication);
-      
+angular.module('articles').controller('articleActionController', ['$scope', '$location', '$timeout', 'Articles', '$http', 'Authentication', 'FileUploader', 'toastr', '$filter', '$window', 'ngDialog', 'fileUpload', '$sce', '$rootScope',
+  function($scope, $location, $timeout, Articles, $http, Authentication, FileUploader, toastr, $filter, $window, ngDialog, fileUpload, $sce, $rootScope) {
+    $scope.article = $scope.ngDialogData.article;
+    $scope.fields = $scope.ngDialogData.fields;
+    $scope.cats = $scope.ngDialogData.cats;
+    $scope.users = $scope.ngDialogData.users;
+    $scope.loadFile = false;
+    $scope.loadSuccess = false;
+    $scope.editDoc = null;
+    $scope.notes = [];
+    $scope.authentication = Authentication;
+    $scope.sortType = 'date';
+    $scope.emailAttachment = [];
+    $scope.newNote = {
+      files: [],
+      filesShow: [],
+      date: new Date(),
+      // followup: new Date()
+    };
+    $scope.editNote = {
+      files: []
+    };
+    $scope.dropdoc = {
+      perPage: 8,
+      n: 0,
+      search: false,
+      sortType: 'date',
+      sortReverse: true
+    };
+    $scope.allFiles = [];
+    $scope.sortReverse = true; //for Notes
+    $scope.date = new Date();
+    $scope.calculator = {};
+    $scope.isLegacy = false;
+    $scope.loading = false;
+    $scope.confirmLegacy = "";
+    $scope.permissions = [];
+    var fileAction = "";
+    var uploadType = {};
 
+    // $scope.article.RTWregpermFocusInformation = $scope.article.RTWregpermFocusInformation || {value: new Date()};
+    // $scope.article.RTWtransFocusInformation = $scope.article.RTWtransFocusInformation || {value: new Date()};
 
-      $scope.uploaderDoc.onSuccessItem = function (fileItem, response, status, headers) {
-          console.log(response);
-          //if(response._id){
-            var blob = new Blob([response.base64], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-            //saveAs(blob, "export.docx");
-           // var Docxgen = $window.doc;
-            
-            var aTag = document.createElement('a');
-            aTag.setAttribute('href',response.content);
-            aTag.setAttribute('download',"template.docx");
-            aTag.setAttribute('id',"docxtrigger");
-            aTag.setAttribute('target',"_self");
-            aTag.click();
-            
-            //var output = new Docxgen(response).getZip().generate({type: "blob"});
-            //saveAs(output, "raw.docx");
-            toastr.success('File Rendered');
-            $scope.getFiles();
-            $scope.uploaderDoc.clearQueue();
-            //document.getElementById('renderFile').value = "";
-          //}
-
-      };
-        
-      $scope.removeAttachment = function(i){
-        $scope.note.files.splice(i,1);
-        $scope.emailAttachment.splice(i,1);
-      };    
-                                    
-      $scope.uploader = new FileUploader({
-        url: $scope.uploadApiUrl,
-        alias: 'uploadFile'
-      });
-            
-      $scope.uploader.onAfterAddingFile = function() {
-        $scope.loadFile = true;
-        $scope.uploader.uploadAll();
-      };
-        
-      $scope.changeUploadType = function(action, para){
-        fileAction = action;
-        uploadType.note = para.note;
-        uploadType.followup = para.followup;
-        uploadType.case = para.case;
-        uploadType.id = para.id;
-        if(fileAction === 'newFileNote'){
-          $scope.uploader.url = "/api/dropdpc/uploadfile";
-        } else if(action === 'modifyFile'){
-          $scope.uploader.url = "/api/dropdpc/modifyfile";
-        } else if(action === 'newEmailAttachment'){
-          $scope.uploader.url = "/api/dropdpc/uploadfile";
-        } else if(fileAction === "newCaseFile"){
-          $scope.uploader.url = "/api/dropdpc/uploadfile";  
-        }  else if(action === 'editNote'){
-          $scope.uploader.url = "/api/dropdpc/uploadfile";
-        } else {
-          toastr.error('Error in file upload');
-        }
-        $scope.uploader.formData = [uploadType];
-      };
-        
-      $scope.uploader.onSuccessItem = function(fileItem, response, status, headers) {
-        console.log(response);
-        $scope.loadFile = false;
-        if(status === 200){
-          
-          toastr.success('File upload success');
-          if(fileAction === "newFileNote"){
-            $scope.newNote.filesShow.push(response);
-            $scope.newNote.files.push(response._id);
-            //$scope.files.push(response);
-          } else if(fileAction === "modifyFile"){
-            console.log("modifyFile");
-            for(var k in $scope.files){
-              if($scope.files[k]._id === response._id){
-                $scope.files.splice(k,1);
-                $scope.files.push(response);
-                $scope.allFiles.push(response);
-              }
-            }
-          } else if(fileAction === "newEmailAttachment"){
-           $scope.note.files.push({originalName: response.originalName, url: response.Location });
-           $scope.files.push(response);
-           $scope.emailAttachment.push(response);
-          } else if(fileAction === "newCaseFile"){
-            $scope.files.push(response);
-            $scope.allFiles.push(response);
-            $scope.searchAndDisplay("");
-          } else if(fileAction === "editNote"){
-            $scope.editNote.files.push(response);
-
-          }
-          
-        $scope.loadSuccess = true;
-          
-          $scope.getFiles();
-        }
-        else
-          toastr.warning('Error file upload');
-      };
-    
-      $scope.cancelUpload = function () {
-        $scope.uploader.clearQueue();
-      };
-      
-      $scope.deleteFileDropdoc = function (id, i){
-        $http.delete('/api/dropdpc/deletefile/'+id).
-          then(function(response) {
-            console.log(response);
-            if(response.data !== ""){
-              toastr.success("Delete File Suceess");
-              $scope.files.splice(i,1);
-            }
-            else
-              toastr.error("Delete failed");
-          }, function(response) {
-            toastr.error('Error Deleting file');
-          }
-        );
-      };
-
-      $scope.sendNoteByEmail = function(email, id){
-        toastr.info("Sending email...");
-        console.log(email, id);
-        $http.get('/api/exports/sendNoteByEmail/'+id+"/"+email).
-          then(function(response) {
-            console.log(response);
-            if(response.data === "ok")
-              toastr.success("Email sent");
-            else
-              toastr.error("Sending failed");
-          }, function(response) {
-            toastr.error('Error sending email');
-          }
-        );
-      };
-
-      $scope.getFiles = function(){
-        $http.get('/api/dropdpc/getbyclaimant/'+$scope.article._id).
-          then(function(response) {
-            $scope.files = response.data;
-            $scope.allFiles = response.data;
-            $scope.pageLength = Math.ceil(response.data.length / $scope.dropdoc.perPage);
-            $scope.seize(0);
-          }, function(response) {
-            toastr.error('Error Loading files');
-          }
-        );
-      };
-        
-      $scope.splitFields = function(){
-        $scope.allArticles = [];
-        var obj = {};
-        for(var k in $scope.fields){
-          var found = false;
-          for(var i in $scope.article){
-            var currentFiedld;
-            if(i === $scope.fields[k].key){
-              if(i === "_id" || i === "user" || i === "__v" || i === "$$hashKey")
-                continue; 
-              currentFiedld = $scope.fields[k];
-              found = true;
-              obj = {
-                key : i,
-                value : article[i],
-                type : currentFiedld.type,
-                name : currentFiedld.name
-              };           
-                $scope.allArticles.push(obj);
-            }  
-          }
-        }
-          //console.log($scope.otherFileds);
-          //console.log($scope.allArticles);
-      };
-
-      $scope.onlyCategory = function(cat,item){
-        return item.id.category !== cat;
-      };
-
-      $scope.sendEditArticle = function (isValid) {
-        if(isValid){
-          //toastr.warning('Please fill up all fields');
-          //return false;
-        }
-        
-        $scope.article.permissions = angular.copy($scope.permissions);
-        console.log("permissions: ",$scope.permissions);
-        var send = angular.copy($scope.article);
-        delete send.legacy;
-        $http.put('/api/articles/'+$scope.article._id, send).
-          then(function(response) {
-            //$scope.article = response;
-            toastr.success('Claimant Saved');
-          }, function(response) {
-            toastr.error('Error Saving');
-          }
-        );
-      };
-      
-      $scope.permissionsChange = function(data){
-        console.log(data, $scope.permissions);
-        if($scope.permissions.length === 0){
-          $scope.permissions.push(data._id);
-          return;
-        } else {
-          for(var k in $scope.permissionsOutput){
-            if($scope.permissions[k] === data._id){
-              $scope.permissions.splice(Number(k),1);
-              return;
-            }
-          }
-          $scope.permissions.push(data._id);
-        }
-      }
-
-      $scope.addNote = function(isValid){
-        //console.log("add note");
-        /*if (!isValid) {
-          $scope.$broadcast('show-errors-check-validity', 'articleForm');
-          return false;
-        }*/
-        $scope.error = null;
-        var date = new Date($scope.newNote.date);
-        var followupdate = new Date($scope.newNote.followup);
-        date.setUTCHours(12,0,0,0);
-        followupdate.setUTCHours(12,0,0,0);    
-        var note = new Articles({
-          date    : date,
-          article : $scope.article._id,
-          content : $scope.newNote.text,
-          type    : $scope.newNote.type,
-          title   : $scope.newNote.title,
-          _case   : $scope.ngDialogData.article._id,
-          files   : $scope.newNote.files,
-          followUp : followupdate,
-          assign  : $scope.newNote.assign
-        });
-
-
-        if($scope.loadFile){
-          toastr.warning('Uploading file...');
-          return;
-        }
-        $http.post('/api/articles/note', note).
-          then(function(response) {
-            $scope.sendEditArticle(true);
-            console.log(response);
-            toastr.success('New note Saved');
-            $scope.notesUnfilter.push(response.data);
-            $scope.newNote = {files: []};
-            $scope.newNoteId = response.data.id;
-            $scope.uploader.clearQueue();
-            $scope.loadSuccess = false;
-            $scope.newNote.filesShow = [];
-            $scope.searchAndDisplay();
-            $scope.emailAttachment = [];
-            for(var k in response.data.files){
-              $scope.files.push(response.data.files[k]);
-            }
-            if(note.type === "closing"){
-              closeFile();
-            }
-          }, function(response) {
-            $scope.data = response.data || "Request failed";
-            toastr.error('Error adding new note');
-          }
-          ); 
-      };
-
-      $scope.getNotes = function () {
-        $http.get('/api/articles/note/'+$scope.article._id).
-          then(function(response) {
-             $scope.notesUnfilter = response.data;
-             for(var k in response.data){
-               if(response.data[k].date !== null)
-                 response.data[k].date = new Date(response.data[k].date);
-               
-               if(response.data[k].followUp !== null)
-                 response.data[k].followup = new Date(response.data[k].followUp);              
-             }
-             $scope.searchAndDisplay();
-          }, function(response) {
-            $scope.data = response.data || "Request failed";
-          }
-          );  
-      };
-
-      $scope.deleteNote = function(note){
-        $http.delete('/api/articles/note/'+note).
-          then(function(response) {
-             if(response.statusText === "OK")
-               toastr.warning('Note deleted');
-               $('#'+note).fadeOut(300, function(){ $(this).remove();});
-
-          }, function(response) {
-            $scope.data = response.data || "Request failed";
-          }
-        );  
-      };            
-
-      $scope.deleteFollowUp = function(followUp){
-        $http.delete('/api/notes/followup/'+followUp).
-          then(function(response) {
-             if(response.statusText === "OK")
-               toastr.warning('Note deleted');
-               $('#'+followUp).fadeOut(300, function(){ $(this).remove();});
-
-          }, function(response) {
-            $scope.data = response.data || "Request failed";
-          }
-        );  
-      };
-
-      $scope.update = function (isValid) {
-        $scope.error = null;
-        /*
-        if (!isValid) {
-          $scope.$broadcast('show-errors-check-validity', 'articleForm');
-
-          return false;
-        }*/
-        var article = $scope.article;
-        article.permissions = $scope.permissions;
-        console.log("per:   ", $scope.permissions);
-        article.$update(function () {
-          $location.path('articles/' + article._id);
-        }, function (errorResponse) {
-          $scope.error = errorResponse.data.message;
-        });
-      };
-
-      $scope.getFollowUp = function () {
-        $http.get('/api/notes/followup/' + $scope.article._id).
-          then(function(response) {
-             $scope.followup = response.data;
-             for(var k in $scope.followup){
-               /*$scope.notes.push({
-                _id: $scope.followup[k]._id,
-                article: $scope.followup[k].id.article,
-                class: "followupNote",
-                content: $scope.followup[k].id.content,
-                created: $scope.followup[k].id.created,
-                creator: $scope.followup[k].id.creator,
-                date: $scope.followup[k].date,
-                followUp: $scope.followup[k].id.followUp,
-                icon: "fa-certificate",
-                title: "F.U " + $scope.followup[k].id.title,
-                type: $scope.followup[k].id.type,
-                url: $scope.followup[k].url,
-                status: $scope.followup[k].status,
-                id: $scope.followup[k].id
-               });*/
-             }
-          }, function(response) {
-            $scope.data = response.data || "Request failed";
-          }
-
-          );
+    // if ($scope.users && $scope.users.length) {
+    //   for (var i = 0, len = $scope.users.length; i < len; i++) {
+    //     if ($scope.users[i].hasOwnProperty('ticked'))
+    //       delete $scope.users[i].ticked;
+    //   }
+    // }
+    // console.log('users', $scope.users);
+    //
+    $scope.froalaOptions = {
+      toolbarButtons: ["bold","italic","underline","strikeThrough","fontSize","fontFamily","color",
+        "|","formatBlock","blockStyle","align","insertOrderedList","insertUnorderedList","outdent","indent",
+        "|","createLink","insertImage","insertVideo","insertHorizontalRule","undo","redo","html"],
+      key: 'md1hkC-11ydbdmcE-13dvD1wzF-7=='
     };
 
-      $scope.updateAllNotes = function(){
+    $scope.uploaderDoc = new FileUploader({
+      url: '/api/exports/renderDoc/' + $scope.article._id,
+      alias: 'docRender',
+      responseType: 'buffer',
+      removeAfterUpload: true
+        //headers: {'responseType':'buffer'}
+    });
+
+    $scope.bAllowedToChangeInfo = false;
+    if ($scope.authentication.user.roles.indexOf('admin2') !== -1 || $scope.authentication.user.roles.indexOf('admin') !== -1)
+      $scope.bAllowedToChangeInfo = true;
+
+    $scope.uploaderDoc.onSuccessItem = function(fileItem, response, status, headers) {
+      console.log(response);
+      //if(response._id){
+      var blob = new Blob([response.base64], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+      //saveAs(blob, "export.docx");
+      // var Docxgen = $window.doc;
+
+      var aTag = document.createElement('a');
+      aTag.setAttribute('href', response.content);
+      aTag.setAttribute('download', "template.docx");
+      aTag.setAttribute('id', "docxtrigger");
+      aTag.setAttribute('target', "_self");
+      aTag.click();
+
+      //var output = new Docxgen(response).getZip().generate({type: "blob"});
+      //saveAs(output, "raw.docx");
+      toastr.success('File Rendered');
+      $scope.getFiles();
+      // $scope.uploaderDoc.clearQueue();
+      //document.getElementById('renderFile').value = "";
+      //}
+
+    };
+
+    $scope.removeAttachment = function(i) {
+      $scope.note.files.splice(i, 1);
+      $scope.emailAttachment.splice(i, 1);
+    };
+
+    $scope.uploader = new FileUploader({
+      url: $scope.uploadApiUrl,
+      alias: 'uploadFile'
+    });
+
+    $scope.uploader.onAfterAddingFile = function() {
+      $scope.loadFile = true;
+      $scope.uploader.uploadAll();
+    };
+
+    $scope.changeUploadType = function(action, para) {
+      fileAction = action;
+      uploadType.note = para.note;
+      uploadType.followup = para.followup;
+      uploadType.case = para.case;
+      uploadType.id = para.id;
+      if (fileAction === 'newFileNote') {
+        $scope.uploader.url = "/api/dropdpc/uploadfile";
+      } else if (action === 'modifyFile') {
+        $scope.uploader.url = "/api/dropdpc/modifyfile";
+      } else if (action === 'newEmailAttachment') {
+        $scope.uploader.url = "/api/dropdpc/uploadfile";
+      } else if (fileAction === "newCaseFile") {
+        $scope.uploader.url = "/api/dropdpc/uploadfile";
+      } else if (action === 'editNote') {
+        $scope.uploader.url = "/api/dropdpc/uploadfile";
+      } else {
+        toastr.error('Error in file upload');
+      }
+      $scope.uploader.formData = [uploadType];
+    };
+
+    $scope.uploader.onSuccessItem = function(fileItem, response, status, headers) {
+      console.log(response);
+      $scope.loadFile = false;
+      if (status === 200) {
+
+        toastr.success('File upload success');
+        if (fileAction === "newFileNote") {
+          $scope.newNote.filesShow.push(response);
+          $scope.newNote.files.push(response._id);
+          //$scope.files.push(response);
+        } else if (fileAction === "modifyFile") {
+          console.log("modifyFile");
+          for (var k in $scope.files) {
+            if ($scope.files[k]._id === response._id) {
+              $scope.files.splice(k, 1);
+              $scope.files.push(response);
+              $scope.allFiles.push(response);
+            }
+          }
+        } else if (fileAction === "newEmailAttachment") {
+          $scope.note.files.push({ originalName: response.originalName, url: response.Location });
+          $scope.files.push(response);
+          $scope.emailAttachment.push(response);
+        } else if (fileAction === "newCaseFile") {
+          $scope.files.push(response);
+          $scope.allFiles.push(response);
+          $scope.searchAndDisplay("");
+        } else if (fileAction === "editNote") {
+          $scope.editNote.files.push(response);
+
+        }
+
+        $scope.loadSuccess = true;
+
+        $scope.getFiles();
+      } else
+        toastr.warning('Error file upload');
+    };
+
+    $scope.cancelUpload = function() {
+      $scope.uploader.clearQueue();
+    };
+
+    $scope.deleteFileDropdoc = function(id, i) {
+      $http.delete('/api/dropdpc/deletefile/' + id)
+        .then(function(response) {
+          console.log(response);
+          if (response.data !== "") {
+            toastr.success("Delete File Suceess");
+            $scope.files.splice(i, 1);
+          } else
+            toastr.error("Delete failed");
+        }, function(response) {
+          toastr.error('Error Deleting file');
+        });
+    };
+
+    $scope.sendNoteByEmail = function(email, id) {
+      toastr.info("Sending email...");
+      console.log(email, id);
+      $http.get('/api/exports/sendNoteByEmail/' + id + "/" + email)
+        .then(function(response) {
+          console.log(response);
+          if (response.data === "ok")
+            toastr.success("Email sent");
+          else
+            toastr.error("Sending failed");
+        }, function(response) {
+          toastr.error('Error sending email');
+        });
+    };
+
+    $scope.getFiles = function() {
+      $http.get('/api/dropdpc/getbyclaimant/' + $scope.article._id)
+        .then(function(response) {
+          $scope.files = response.data;
+          $scope.allFiles = response.data;
+          $scope.pageLength = Math.ceil(response.data.length / $scope.dropdoc.perPage);
+          $scope.seize(0);
+        }, function(response) {
+          toastr.error('Error Loading files');
+        });
+    };
+
+    $scope.splitFields = function() {
+      $scope.allArticles = [];
+      var obj = {};
+      for (var k in $scope.fields) {
+        var found = false;
+        for (var i in $scope.article) {
+          var currentFiedld;
+          if (i === $scope.fields[k].key) {
+            if (i === "_id" || i === "user" || i === "__v" || i === "$$hashKey")
+              continue;
+            currentFiedld = $scope.fields[k];
+            found = true;
+            obj = {
+              key: i,
+              value: article[i],
+              type: currentFiedld.type,
+              name: currentFiedld.name
+            };
+            $scope.allArticles.push(obj);
+          }
+        }
+      }
+      //console.log($scope.otherFileds);
+      //console.log($scope.allArticles);
+    };
+
+    $scope.onlyCategory = function(cat, item) {
+      return item.id.category !== cat;
+    };
+
+    $scope.sendEditArticle = function(isValid) {
+      if (isValid) {
+        //toastr.warning('Please fill up all fields');
+        //return false;
+      }
+
+      $scope.article.permissions = angular.copy($scope.permissions);
+      console.log("permissions: ", $scope.permissions);
+      var send = angular.copy($scope.article);
+      delete send.legacy;
+      $http.put('/api/articles/' + $scope.article._id, send)
+        .then(function(response) {
+          //$scope.article = response;
+          toastr.success('Claimant Saved');
+        }, function(response) {
+          toastr.error('Error Saving');
+        });
+    };
+
+    $scope.permissionsChange = function(data) {
+      if ($scope.permissions.length === 0) {
+        $scope.permissions.push({
+          _id: data._id,
+          displayName: data.displayName
+        });
+        return;
+      } else {
+        for (var k in $scope.permissions) {
+          if ($scope.permissions[k]._id === data._id) {
+            $scope.permissions.splice(Number(k), 1);
+            return;
+          }
+        }
+        $scope.permissions.push({
+          _id: data._id,
+          displayName: data.displayName
+        });
+      }
+    }
+
+    $scope.addNote = function(isValid) {
+      //console.log("add note");
+      /*if (!isValid) {
+        $scope.$broadcast('show-errors-check-validity', 'articleForm');
+        return false;
+      }*/
+      $scope.error = null;
+      var date = new Date($scope.newNote.date);
+      var followupdate = new Date($scope.newNote.followup);
+      date.setUTCHours(12, 0, 0, 0);
+      followupdate.setUTCHours(12, 0, 0, 0);
+      var note = new Articles({
+        date: date,
+        article: $scope.article._id,
+        content: $scope.newNote.text,
+        type: $scope.newNote.type,
+        title: $scope.newNote.title,
+        _case: $scope.ngDialogData.article._id,
+        files: $scope.newNote.files,
+        followUp: followupdate,
+        assign: $scope.newNote.assign
+      });
+
+
+      if ($scope.loadFile) {
+        toastr.warning('Uploading file...');
+        return;
+      }
+      $http.post('/api/articles/note', note)
+        .then(function(response) {
+          $scope.sendEditArticle(true);
+          console.log(response);
+          toastr.success('New note Saved');
+          $scope.notesUnfilter.push(response.data);
+          $scope.newNote = { files: [] };
+          $scope.newNoteId = response.data.id;
+          $scope.uploader.clearQueue();
+          $scope.loadSuccess = false;
+          $scope.newNote.filesShow = [];
+          $scope.searchAndDisplay();
+          $scope.emailAttachment = [];
+          for (var k in response.data.files) {
+            $scope.files.push(response.data.files[k]);
+          }
+          if (note.type === "closing") {
+            closeFile();
+          }
+        }, function(response) {
+          $scope.data = response.data || "Request failed";
+          toastr.error('Error adding new note');
+        });
+    };
+
+    $scope.getNotes = function() {
+      $http.get('/api/articles/note/' + $scope.article._id).
+      then(function(response) {
+        $scope.notesUnfilter = response.data;
+        for (var k in response.data) {
+          if (response.data[k].date !== null)
+            response.data[k].date = new Date(response.data[k].date);
+
+          if (response.data[k].followUp !== null)
+            response.data[k].followup = new Date(response.data[k].followUp);
+        }
+        $scope.searchAndDisplay();
+      }, function(response) {
+        $scope.data = response.data || "Request failed";
+      });
+    };
+
+    $scope.deleteNote = function(note) {
+      if (!$scope.canEditNote(note)) return;
+
+      note = note._id;
+
+      $http.delete('/api/articles/note/' + note)
+        .then(function(response) {
+          if (response.statusText === "OK")
+            toastr.warning('Note deleted');
+          $('#' + note).fadeOut(300, function() { $(this).remove(); });
+
+        }, function(response) {
+          $scope.data = response.data || "Request failed";
+        });
+    };
+
+    $scope.deleteFollowUp = function(note) {
+      if (!$scope.canEditNote(note)) return;
+
+      note = note._id;
+
+      $http.delete('/api/notes/followup/' + note)
+        .then(function(response) {
+          if (response.statusText === "OK")
+            toastr.warning('Note deleted');
+          $('#' + note).fadeOut(300, function() { $(this).remove(); });
+
+        }, function(response) {
+          $scope.data = response.data || "Request failed";
+        });
+    };
+
+    $scope.update = function(isValid) {
+      $scope.error = null;
+      /*
+      if (!isValid) {
+        $scope.$broadcast('show-errors-check-validity', 'articleForm');
+
+        return false;
+      }*/
+      var article = $scope.article;
+      article.permissions = $scope.permissions;
+      article.
+      console.log("per:   ", $scope.permissions);
+      article.$update(function() {
+        $location.path('articles/' + article._id);
+      }, function(errorResponse) {
+        $scope.error = errorResponse.data.message;
+      });
+    };
+
+    $scope.getFollowUp = function() {
+      $http.get('/api/notes/followup/' + $scope.article._id)
+        .then(function(response) {
+            $scope.followup = response.data;
+            for (var k in $scope.followup) {
+              /*$scope.notes.push({
+               _id: $scope.followup[k]._id,
+               article: $scope.followup[k].id.article,
+               class: "followupNote",
+               content: $scope.followup[k].id.content,
+               created: $scope.followup[k].id.created,
+               creator: $scope.followup[k].id.creator,
+               date: $scope.followup[k].date,
+               followUp: $scope.followup[k].id.followUp,
+               icon: "fa-certificate",
+               title: "F.U " + $scope.followup[k].id.title,
+               type: $scope.followup[k].id.type,
+               url: $scope.followup[k].url,
+               status: $scope.followup[k].status,
+               id: $scope.followup[k].id
+              });*/
+            }
+          }, function(response) {
+            $scope.data = response.data || "Request failed";
+          }
+
+        );
+    };
+
+    $scope.updateAllNotes = function() {
       $scope.getNotes();
       $scope.getFollowUp();
     };
 
-      $scope.exportArticleToPdf = function() {
+    $scope.exportArticleToPdf = function() {
       var art = $scope.article;
       var art2 = sortFields($scope.article);
       var notes = $scope.notes;
@@ -940,150 +994,169 @@ angular.module('articles').controller('articleActionController', ['$scope', '$lo
       html += '<div><font style="font-size:30px">' + art.FirstnameContact.value + ' ' + art.LastnameContact.value + '</font></div><br>';
       html += '<div><font style="font-size:24px">Claim #' + art.ClaimContact.value + '</font></div><br>';
       html += '<div><font style="font-size:24px">DOI ' + $filter('date')(art.DOIContact.value, "MM/dd/yy") + '</font></div><br><br>';
-        for(var k in art2){
-          if(art2[k].hasOwnProperty("id")
-            && art2[k].value !== "" &&
-            art2[k].value !== " " &&
-            art2[k].id.key !== "NorthorCentralorStatewideFocusInformation" &&
-            art2[k].id.key !== "DateassignedFocusInformation" &&
-            art2[k].id.category !== "System" &&
-            !angular.isUndefined(art2[k].value) &&
-            !angular.isUndefined(art2[k].id.category)
-          ){
-            if(!obj.hasOwnProperty(art2[k].id.category)){
-               obj[art2[k].id.category] = [];
-             }
-           if(art2[k].id.type === "date"){
-             obj[art2[k].id.category].push({
-                     "name" : art2[k].id.name.replace(/(\r\n|\n|\r)/gm,"") , "value" : $filter('date')(art2[k].value, "MM/dd/yy")
-               });
-           }
-           else if((art2[k].id.type === "text" || art2[k].id.type === "dropdown") && art2[k].id.key !== "FirstnameContact"  && art2[k].id.key !== "LastnameContact"){
-             obj[art2[k].id.category].push({
-                     "name" : art2[k].id.name.replace(/(\r\n|\n|\r)/gm,"") , "value" : art2[k].value.replace(/(\r\n|\n|\r)/gm,"")
-               });
-           }
-           console.log(obj[art2[k].id.category]);
+      for (var k in art2) {
+        if (art2[k].hasOwnProperty("id") && art2[k].value !== "" &&
+          art2[k].value !== " " &&
+          art2[k].id.key !== "NorthorCentralorStatewideFocusInformation" &&
+          art2[k].id.key !== "DateassignedFocusInformation" &&
+          art2[k].id.category !== "System" &&
+          !angular.isUndefined(art2[k].value) &&
+          !angular.isUndefined(art2[k].id.category)
+        ) {
+          if (!obj.hasOwnProperty(art2[k].id.category)) {
+            obj[art2[k].id.category] = [];
+          }
+          if (art2[k].id.type === "date") {
+            obj[art2[k].id.category].push({
+              "name": art2[k].id.name.replace(/(\r\n|\n|\r)/gm, ""),
+              "value": $filter('date')(art2[k].value, "MM/dd/yy")
+            });
+          } else if ((art2[k].id.type === "text" || art2[k].id.type === "dropdown") && art2[k].id.key !== "FirstnameContact" && art2[k].id.key !== "LastnameContact") {
+            obj[art2[k].id.category].push({
+              "name": art2[k].id.name.replace(/(\r\n|\n|\r)/gm, ""),
+              "value": art2[k].value.replace(/(\r\n|\n|\r)/gm, "")
+            });
+          }
+          console.log(obj[art2[k].id.category]);
+        }
+      }
+      html += "<div>";
+      for (var k in obj) {
+        if (k === "Contact") {
+          for (var i in obj[k]) {
+            html += "<p style='margin:0px'>" + obj[k][i].name + " : " + obj[k][i].value + "</p><br>";
           }
         }
-        html += "<div>";
-        for(var k in obj){
-          if(k === "Contact"){
-            for(var i in obj[k]){
-              html += "<p style='margin:0px'>" + obj[k][i].name + " : " + obj[k][i].value + "</p><br>";
-            }
+      }
+      html += "</div>";
+      for (var k in obj) {
+        if (k !== "Contact") {
+          html += "<p><font style='font-size:24px;'>" + k + "</font><br></p>";
+          for (var i in obj[k]) {
+            html += "<p style='margin:0px'>" + obj[k][i].name + " : " + obj[k][i].value + "</p><br>";
           }
         }
-        html += "</div>";
-        for(var k in obj){
-          if(k !== "Contact"){
-            html += "<p><font style='font-size:24px;'>" + k + "</font><br></p>";
-            for(var i in obj[k]){
-              html += "<p style='margin:0px'>"+obj[k][i].name + " : " + obj[k][i].value + "</p><br>";
-            }
-          }
-        }
-        html +=   "</div>";
-        console.log(html);
+      }
+      html += "</div>";
+      console.log(html);
       // Save the PDF
-               var pdf = new jsPDF('p', 'pt', 'letter');
+      var pdf = new jsPDF('p', 'pt', 'letter');
 
-            var specialElementHandlers = {
-                '#bypassme': function(element, renderer) {
-                    return true;
-                }
-            };
-            var margins = {
-                top: 10,
-                bottom: 10,
-                left: 40,
-                width: 522
-            };
-            pdf.fromHTML(
-                    html, // HTML string or DOM elem ref.
-                    margins.left, // x coord
-                    margins.top, {// y coord
-                        'width': margins.width, // max width of content on PDF
-                    },
-            function(dispose) {
-                pdf.save('Focus-On-Intervention-'+art.FirstnameContact.value + '-' + art.LastnameContact.value + '.pdf');
-            }
-            , margins);
+      var specialElementHandlers = {
+        '#bypassme': function(element, renderer) {
+          return true;
+        }
+      };
+      var margins = {
+        top: 10,
+        bottom: 10,
+        left: 40,
+        width: 522
+      };
+      pdf.fromHTML(
+        html, // HTML string or DOM elem ref.
+        margins.left, // x coord
+        margins.top, { // y coord
+          'width': margins.width, // max width of content on PDF
+        },
+        function(dispose) {
+          pdf.save('Focus-On-Intervention-' + art.FirstnameContact.value + '-' + art.LastnameContact.value + '.pdf');
+        }, margins);
     };
-    
-      $scope.decodeHtml = function(text){
-        $scope.render = text;
-          for(var k in $scope.article){
-            if($scope.article[k] !== undefined && angular.isObject($scope.article[k]) && k !== "permissions"){
-            var re = "\*\*" + $scope.article[k].id.key + "\*\*";
-            $scope.render = $scope.render.replace(re, $scope.article[k].value);  
-            }
-          }
-           var pdf = new jsPDF('p', 'pt', 'letter');
-              var source = $scope.render;
 
-              var specialElementHandlers = {
-                  '#bypassme': function(element, renderer) {
-                      return true;
-                  }
-              };
-              var margins = {
-                  top: 10,
-                  bottom: 10,
-                  left: 40,
-                  width: 522
-              };
-              pdf.fromHTML(
-                      source, // HTML string or DOM elem ref.
-                      margins.left, // x coord
-                      margins.top, {// y coord
-                          'width': margins.width, // max width of content on PDF
-                          'elementHandlers': specialElementHandlers
-                      },
-              function(dispose) {
-                  pdf.save('Focus-On-Intervention-'+$scope.article.FirstnameContact.value + '-' + $scope.article.LastnameContact.value + '.pdf');
-              }
-              , margins);
+    $scope.decodeHtml = function(text) {
+      $scope.render = text;
+      for (var k in $scope.article) {
+        if ($scope.article[k] !== undefined && angular.isObject($scope.article[k]) && k !== "permissions") {
+          var re = "\*\*" + $scope.article[k].id.key + "\*\*";
+          $scope.render = $scope.render.replace(re, $scope.article[k].value);
+        }
+      }
+      var pdf = new jsPDF('p', 'pt', 'letter');
+      var source = $scope.render;
 
-
+      var specialElementHandlers = {
+        '#bypassme': function(element, renderer) {
+          return true;
+        }
       };
-
-      $scope.emailExport = function(){
-        $http.get('/api/templates').
-          then(function(response) {
-            $scope.templates = response.data;
-
-          },function(response) {
-
-          }); 
+      var margins = {
+        top: 10,
+        bottom: 10,
+        left: 40,
+        width: 522
       };
+      pdf.fromHTML(
+        source, // HTML string or DOM elem ref.
+        margins.left, // x coord
+        margins.top, { // y coord
+          'width': margins.width, // max width of content on PDF
+          'elementHandlers': specialElementHandlers
+        },
+        function(dispose) {
+          pdf.save('Focus-On-Intervention-' + $scope.article.FirstnameContact.value + '-' + $scope.article.LastnameContact.value + '.pdf');
+        }, margins);
 
-      $scope.editDocFun = function(doc){
-        $scope.tempDoc = doc;
-        $scope.editDoc = doc;
-      };
 
-      $scope.changeStatus = function(id){
-      
-       $http.get('/api/notes/changestatus/'+id).
-        then(function(response) {
-          for(var k in $scope.notes){
-            if($scope.notes[k]._id === response.data._id){
+    };
+
+    $scope.emailExport = function() {
+      $http.get('/api/templates')
+        .then(function(response) {
+          $scope.templates = response.data;
+
+        }, function(response) {
+
+        });
+    };
+
+    $scope.editDocFun = function(doc) {
+      $scope.tempDoc = doc;
+      $scope.editDoc = doc;
+    };
+
+    $scope.changeStatus = function(note) {
+      if (!$scope.canEditNote(note)) return;
+
+      var id = note._id;
+
+      $http.get('/api/notes/changestatus/' + id)
+        .then(function(response) {
+          for (var k in $scope.notes) {
+            if ($scope.notes[k]._id === response.data._id) {
               $scope.notes[k].status = response.data.status;
             }
           }
-          
-        },function(response) {
 
-        }); 
+        }, function(response) {
+
+        });
     };
-    
-      $scope.renderDocument = function(){
-        console.log("here");
+
+    $scope.changeEmailSent = function(note) {
+      if (!$scope.canEditNote(note)) return;
+
+      var id = note._id;
+
+      $http.get('/api/notes/change_emailsent/' + id)
+        .then(function(response) {
+          for (var k in $scope.notes) {
+            if ($scope.notes[k]._id === response.data._id) {
+              $scope.notes[k].email_sent = response.data.email_sent;
+            }
+          }
+
+        }, function(response) {
+
+        });
+    };
+
+    $scope.renderDocument = function() {
+      console.log("here");
       $scope.uploaderDoc.uploadAll();
       /*
-      $http.post('/api/exports/renderDoc', $scope.article).
-          then(function(response) {
+      $http.post('/api/exports/renderDoc', $scope.article)
+        .then(function(response) {
             console.log(response.data);
           }, function(response) {
             $scope.data = response.data || "Request failed";
@@ -1092,414 +1165,451 @@ angular.module('articles').controller('articleActionController', ['$scope', '$lo
           );
         */
     };
-    
-      $scope.emailDialog = function(note){
-        $scope.note = note;
-        $scope.emailAttachment = angular.copy(note.files);
-        console.log(note, $scope.note);
-        $scope.dialog2 = ngDialog.open({
-          template: 'emailTemplate',
-          scope: $scope
+
+    $scope.emailDialog = function(note) {
+      $scope.note = note;
+      $scope.emailAttachment = angular.copy(note.files);
+      console.log(note, $scope.note);
+      $scope.dialog2 = ngDialog.open({
+        template: 'emailTemplate',
+        scope: $scope,
+        className: 'ngdialog-overlay ngdialog-custom dialog-medium-size',
+        closeByEscape: true,
+        showClose: false,
+        overlay: false,
+      });
+    };
+
+    $scope.emailDialogDropDoc = function(file) {
+      console.log(file);
+      $scope.note = {};
+      $scope.note.files = [];
+      $scope.note.files.push(file);
+      $scope.emailAttachment.push(file);
+      $scope.dialog2 = ngDialog.open({
+        template: 'emailTemplate',
+        scope: $scope
+      });
+    };
+
+    $scope.sendEmail = function() {
+      console.log($scope.emailAttachment);
+      var att = "<br>---<br>Attached files<br>";
+      for (var k in $scope.emailAttachment) {
+        att += "<a href='" + $scope.emailAttachment[k].url + "'>" + $scope.emailAttachment[k].originalName + "</a><br>";
+      }
+      var sendNote = $scope.note;
+
+      if ($scope.emailAttachment.length > 0)
+        sendNote.content += att;
+      delete sendNote._case;
+      $http.post('/api/exports/sendNoteByEmail', sendNote)
+        .then(function(response) {
+          if (response.status !== 200)
+            toastr.warning("Email not sent");
+          else
+            toastr.success("Email Sent Successfully");
+          $scope.articles = response.data;
+        }, function(response) {
+
+          $scope.data = response.data || "Request failed";
         });
-      };
+    };
+
+    $scope.isClosed = function(date) {
+      return angular.isDate(date);
+    };
+
+    $scope.openFile = function() {
+      $scope.article.DateClosedFocusInformation.value = "";
+      toastr.info("Claimate Open");
+    };
+
+    $scope.deleteFile = function(item) {
+      if (!$scope.confirm === 'DELETE')
+        return;
+      $http.delete('/api/articles/' + item._id)
+        .then(function(response) {
+          toastr.info("Claimate deleted");
+        }, function(response) {
+
+        });
+    };
+
+    $scope.flipSortReverse = function() {
+      $scope.sortReverse = !$scope.sortReverse;
+    }
+
+    $scope.searchAndDisplay = function() {
+      $scope.isNotesReady = false;
       
-      $scope.emailDialogDropDoc = function(file){
-        console.log(file);
-        $scope.note = {};
-        $scope.note.files = [];
-        $scope.note.files.push(file);
-        $scope.emailAttachment.push(file);
-        $scope.dialog2 = ngDialog.open({
-          template: 'emailTemplate',
-          scope: $scope
-        });
-      };
+      $scope.notes = $scope.notesUnfilter;
+      $scope.notes = $filter('filter')($scope.notes, {
+        $: $scope.search
+      });
 
-      $scope.sendEmail = function(){
-        console.log($scope.emailAttachment);
-       var att = "<br>---<br>Attached files<br>";
-            for(var k in $scope.emailAttachment){
-              att += "<a href='" + $scope.emailAttachment[k].url + "'>"+$scope.emailAttachment[k].originalName+"</a><br>";
-            }
-            var sendNote = $scope.note;
-
-            if($scope.emailAttachment.length > 0)
-              sendNote.content += att;
-            delete sendNote._case;
-            $http.post('/api/exports/sendNoteByEmail', sendNote).
-              then(function(response) {
-                if(response.status !== 200)
-                  toastr.warning("Email not sent");
-                else
-                  toastr.success("Email Sent Successfully");
-                $scope.articles = response.data;
-              }, function(response) {
-
-                $scope.data = response.data || "Request failed";
-              }
-            ); 
-      };
-
-      $scope.isClosed = function(date){
-        return angular.isDate(date);
-      };
-
-      $scope.openFile = function(){
-        $scope.article.DateClosedFocusInformation.value = "";
-        toastr.info("Claimate Open");
-      };
-
-      $scope.deleteFile = function(item){
-        if(!$scope.confirm === 'DELETE')
-          return;
-        $http.delete('/api/articles/'+item._id).
-          then(function(response) {
-            toastr.info("Claimate deleted");
-          },function(response) {
-
-          }); 
-      };
-
-      $scope.searchAndDisplay = function() {
-            $scope.notes = $scope.notesUnfilter;
-            $scope.notes = $filter('filter')($scope.notes, {
-              $: $scope.search
-            });
-            $scope.notes = $filter('orderBy')($scope.notes, "date", $scope.sortReverse);
-            var regular = [];
-            var prior = [];
-            for(var k in $scope.notes){
-              if($scope.notes[k].type === "newInfo"){
-                prior.push($scope.notes[k]);
-              } else {
-                regular.push($scope.notes[k]);
-              }
-            }
-            $scope.notes = prior.concat(regular);
-      };
-
-      $scope.updateNote = function(i){
-        $http.post('/api/notes', $scope.editNote).
-          then(function(response) {
-            toastr.success('Success Updating Note');
-          }, function(response) {
-            $scope.data = response.data || "Request failed";
-            toastr.error('Error update ');
-          }
-        ); 
-      };
-
-      $scope.eidtNoteDialog = function(note){
-        $scope.editNote = note;
-        $scope.dialog3 = ngDialog.open({
-          template: 'editNoteTemplate',
-          scope: $scope
-        });
-      };
-      
-      $scope.showPdfDialog = function(url){
-          console.log(url);
-          var config = {
-            headers:  {
-              "X-Testing" : "testing",
-              "Access-Control-Allow-Headers": "Content-Type",
-              "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-              "Access-Control-Allow-Origin": "*",
-              "responseType":'arraybuffer'
-            },
-            responseType:'arraybuffer'
-          };
-          $scope.loadingPdf = true;
-          $http.get(url, config)
-          .success(function (response) {
-            $scope.loadingPdf = false;
-            var file = new Blob([response], {type: 'application/pdf'});
-            var fileURL = URL.createObjectURL(file);
-            $scope.url = $sce.trustAsResourceUrl(fileURL);
-          });
-          
-          $scope.dialog4 = ngDialog.open({
-            template: 'PdfTemplate',
-            scope: $scope
-          });
-        };
-        
-      $scope.checkIfPdf = function(name){
-        return /\.(pdf|PDF)$/.test(name);
-      };
-
-      function addFields(){
-        var fields = $scope.fields;
-        var file = $scope.article;
-        var save = false;
-        var count = 0;
-        for(var k in file){
-          if(typeof file[k] === 'object' && file[k] !== null && file[k].hasOwnProperty("value")){
-            count++;
-          }
-        }
-        //if(fields.length > count){
-          for(var i in fields){
-            var find = false;
-            if(!file.hasOwnProperty(fields[i].key)){
-              file[fields[i].key] = {id: fields[i], value: ""};
-              toastr.info('New Field Added: ' + fields[i].name);
-              save = true;
-            }
-          }
-        //}
-        $scope.article = file;
-        $scope.article_sort = sortFields(file);
-        if(!$scope.article.legacy){
-          $scope.article.legacy = [];
-        }
-        $scope.article.legacy.push({"created" : ""});
-        if(save === true){
-          $scope.sendEditArticle(true);
+      var regular = [];
+      var prior = [];
+      for (var k in $scope.notes) {
+        if ($scope.notes[k].type === "newInfo") {
+          prior.push($scope.notes[k]);
+        } else {
+          regular.push($scope.notes[k]);
         }
       }
-  
-      function sortFields(input){
-        var array = [];
-        var other_arr = [];
-        for(var objectKey in input) {
-            if(objectKey !== undefined && angular.isObject(input[objectKey]) && objectKey !== "permissions" && objectKey !== "legacy")
-                array.push(input[objectKey]);
-              else
-                other_arr.push(input[objectKey]);
-        }
-          
-        array.sort(function(a, b){
-            //var aPos = parseInt(a.id.order);
-            //var bPos = parseInt(b.id.order);
-            if(a.id === null || b.id === null)
-              return 0;
-             return a.id.order - b.id.order;  
-        });
-        return array;
-      }
       
-      function sortFieldsToObj(input){
-        var array = [];
-        for(var objectKey in input) {
-            if(objectKey !== undefined && angular.isObject(input[objectKey]) && objectKey !== "permissions")
-                array.push(input[objectKey]);
-        }
-          
-        array.sort(function(a, b){
-            //var aPos = parseInt(a.id.order);
-            //var bPos = parseInt(b.id.order);
-             return a.id.order - b.id.order;  
-        });
-        
-        var obj = {};
-        for(var k in array){
-          console.log(array[k].id.order , " -- " ,array[k].id.key );
-          var obj2 = {"value" : array[k].value, "id" : array[k].id};
-          obj[array[k].id.key] =  obj2;
-          
-        }
-        
-        console.log(obj);
-        return obj;
-      }
+      console.log('sortReverse', $scope.sortReverse);
       
-      function closeFile(){
-        $scope.article.DateClosedFocusInformation.value = new Date();
+      prior = $filter('orderBy')(prior, "date", $scope.sortReverse);
+      regular = $filter('orderBy')(regular, "date", $scope.sortReverse);
+      
+      $scope.notes = prior.concat(regular);
+
+      $scope.isNotesReady = true;
+    };
+
+    $scope.canEditNote = function(note) {
+      if ($scope.authentication.user.roles.indexOf('admin') !== -1)
+        return true;
+
+      if ($scope.authentication.user.roles.indexOf('admin1') !== -1)
+        return false;
+
+      if ((note.creator.hasOwnProperty('_id') && note.creator._id == $scope.authentication.user._id) || (!note.creator.hasOwnProperty('_id') && note.creator == $scope.authentication.user._id)) {
+        var createdAt = new Date(note.created).getTime();
+        var now = new Date().getTime();
+
+        if (parseInt(now) - parseInt(createdAt) < 86400 * 1000) return true;
+      }
+
+      return false;
+    }
+
+    $scope.updateNote = function(i) {
+      $http.post('/api/notes', $scope.editNote)
+        .then(function(response) {
+          toastr.success('Success Updating Note');
+        }, function(response) {
+          $scope.data = response.data || "Request failed";
+          toastr.error('Error update ');
+        });
+    };
+
+    $scope.editNoteDialog = function(note) {
+      $scope.editNote = note;
+      $scope.dialog3 = ngDialog.open({
+        template: 'editNoteTemplate',
+        scope: $scope
+      });
+    };
+
+    $scope.showPdfDialog = function(url) {
+      console.log(url);
+      var config = {
+        headers: {
+          "X-Testing": "testing",
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Origin": "*",
+          "responseType": 'arraybuffer'
+        },
+        responseType: 'arraybuffer'
+      };
+      $scope.loadingPdf = true;
+      $http.get(url, config)
+        .success(function(response) {
+          $scope.loadingPdf = false;
+          var file = new Blob([response], { type: 'application/pdf' });
+          var fileURL = URL.createObjectURL(file);
+          $scope.url = $sce.trustAsResourceUrl(fileURL);
+        });
+
+      $scope.dialog4 = ngDialog.open({
+        template: 'PdfTemplate',
+        scope: $scope
+      });
+    };
+
+    $scope.checkIfPdf = function(name) {
+      return /\.(pdf|PDF)$/.test(name);
+    };
+
+    function addFields() {
+      var fields = $scope.fields;
+      var file = $scope.article;
+      var save = false;
+      var count = 0;
+      for (var k in file) {
+        if (typeof file[k] === 'object' && file[k] !== null && file[k].hasOwnProperty("value")) {
+          count++;
+        }
+      }
+      //if(fields.length > count){
+      for (var i in fields) {
+        var find = false;
+        if (!file.hasOwnProperty(fields[i].key)) {
+          file[fields[i].key] = { id: fields[i], value: "" };
+          toastr.info('New Field Added: ' + fields[i].name);
+          save = true;
+        }
+      }
+      //}
+      $scope.article = file;
+      $scope.article_sort = sortFields(file);
+      if (!$scope.article.legacy) {
+        $scope.article.legacy = [];
+      }
+      $scope.article.legacy.push({ "created": "" });
+      if (save === true) {
         $scope.sendEditArticle(true);
-        toastr.info("Claimate Closed");
-
-      }
-      
-      function tickPremissions(){
-      //tick the users that exist in the article:
-      for(var k in $scope.users){
-        for(var i in $scope.article.permissions){
-          if($scope.users[k]._id === $scope.article.permissions[i]._id){
-            $scope.users[k].ticked = true;         
-          }
-        }
       }
     }
-    
-      $scope.docCaseFilter = function (item) { 
-        return item.case !== '' || item.case !== null; 
-      };
-      
-      $scope.seize = function(n){
-        var lowEnd = n*$scope.dropdoc.perPage;
-        var highEnd = n*$scope.dropdoc.perPage + $scope.dropdoc.perPage;
-        var arr = [];
-        var bigArray = [];
-        if($scope.dropdoc.search === true){
-          bigArray = $scope.searchFiles;
-        } else {
-          bigArray = $scope.allFiles;
-        }
-        //console.log(bigArray);
-        for(var i = lowEnd ; i < highEnd ; i++){
-          if(bigArray[i] !== undefined){
-            arr.push(bigArray[i]);
+
+    function sortFields(input) {
+      var array = [];
+      var other_arr = [];
+      for (var objectKey in input) {
+        if (objectKey !== undefined && angular.isObject(input[objectKey]) && objectKey !== "permissions" && objectKey !== "legacy")
+          array.push(input[objectKey]);
+        else
+          other_arr.push(input[objectKey]);
+      }
+
+      array.sort(function(a, b) {
+        //var aPos = parseInt(a.id.order);
+        //var bPos = parseInt(b.id.order);
+        if (a.id === null || b.id === null)
+          return 0;
+        return a.id.order - b.id.order;
+      });
+      return array;
+    }
+
+    function sortFieldsToObj(input) {
+      var array = [];
+      for (var objectKey in input) {
+        if (objectKey !== undefined && angular.isObject(input[objectKey]) && objectKey !== "permissions")
+          array.push(input[objectKey]);
+      }
+
+      array.sort(function(a, b) {
+        //var aPos = parseInt(a.id.order);
+        //var bPos = parseInt(b.id.order);
+        return a.id.order - b.id.order;
+      });
+
+      var obj = {};
+      for (var k in array) {
+        console.log(array[k].id.order, " -- ", array[k].id.key);
+        var obj2 = { "value": array[k].value, "id": array[k].id };
+        obj[array[k].id.key] = obj2;
+
+      }
+
+      console.log(obj);
+      return obj;
+    }
+
+    function closeFile() {
+      $scope.article.DateClosedFocusInformation.value = new Date();
+      $scope.sendEditArticle(true);
+      toastr.info("Claimate Closed");
+
+    }
+
+    function tickPremissions() {
+      //tick the users that exist in the article:
+      for (var k in $scope.users) {
+        for (var i in $scope.article.permissions) {
+          if ($scope.users[k]._id === $scope.article.permissions[i]._id) {
+            $scope.users[k].ticked = true;
           }
         }
-        $scope.dropdoc.n = n;
-        $scope.files = arr;
-      };
-      
-      $scope.dropdocPrev = function(){
-        console.log("prev");
-        if($scope.dropdoc.n < 1)
-          return;
-        $scope.seize($scope.dropdoc.n-1);
-      };
-      
-      $scope.dropdocNext = function(){
-        if($scope.dropdoc.n > $scope.pageLength)
-          return;
-        $scope.seize($scope.dropdoc.n+1);
-      };
-      
-      $scope.dropdoc.searchAndDisplay = function(value){
-        
-        if(value === undefined || value === ""){
-          $scope.pageLength = Math.ceil($scope.allFiles.length / $scope.dropdoc.perPage);
-          $scope.dropdoc.search = false;
-          $scope.orderDropdoc();
-          return;
+      }
+      var permissions = angular.copy($scope.article.permissions);
+      var ids = permissions.map(function(obj) { return obj._id; });
+      $scope.permissions = permissions.filter(function(value, index, self) {
+        return ids.indexOf(value._id) === index;
+      });
+    }
+
+    $scope.docCaseFilter = function(item) {
+      return item.case !== '' || item.case !== null;
+    };
+
+    $scope.seize = function(n) {
+      var lowEnd = n * $scope.dropdoc.perPage;
+      var highEnd = n * $scope.dropdoc.perPage + $scope.dropdoc.perPage;
+      var arr = [];
+      var bigArray = [];
+      if ($scope.dropdoc.search === true) {
+        bigArray = $scope.searchFiles;
+      } else {
+        bigArray = $scope.allFiles;
+      }
+      //console.log(bigArray);
+      for (var i = lowEnd; i < highEnd; i++) {
+        if (bigArray[i] !== undefined) {
+          arr.push(bigArray[i]);
         }
+      }
+      $scope.dropdoc.n = n;
+      $scope.files = arr;
+    };
+
+    $scope.dropdocPrev = function() {
+      console.log("prev");
+      if ($scope.dropdoc.n < 1)
+        return;
+      $scope.seize($scope.dropdoc.n - 1);
+    };
+
+    $scope.dropdocNext = function() {
+      if ($scope.dropdoc.n > $scope.pageLength)
+        return;
+      $scope.seize($scope.dropdoc.n + 1);
+    };
+
+    $scope.dropdoc.searchAndDisplay = function(value) {
+
+      if (value === undefined || value === "") {
+        $scope.pageLength = Math.ceil($scope.allFiles.length / $scope.dropdoc.perPage);
+        $scope.dropdoc.search = false;
+        $scope.orderDropdoc();
+        return;
+      }
       $scope.files = $filter('filter')($scope.allFiles, value);
       $scope.searchFiles = $scope.files;
       $scope.pageLength = Math.ceil($scope.files.length / $scope.dropdoc.perPage);
       $scope.dropdoc.search = true;
       $scope.orderDropdoc();
     };
-    
-    $scope.orderDropdoc = function(){
+
+    $scope.orderDropdoc = function() {
       $scope.allFiles = $filter('orderBy')($scope.allFiles, $scope.dropdoc.sortType, $scope.dropdoc.sortReverse);
       $scope.seize(0);
     };
-    
-    $scope.calculator.changeDate = function(){
+
+    $scope.calculator.changeDate = function() {
       $scope.calc1Error = true;
       console.log($scope.selectToday);
       var unix2, unix1;
-      if($scope.selectToday){
+      if ($scope.selectToday) {
         $scope.date2 = new Date();
-        unix2 = new Date().getTime()/1000;
+        unix2 = new Date().getTime() / 1000;
       } else {
         $scope.date2 = $scope.article[$scope.calculator.endingDate.key].value;
-        unix2 = $scope.date2.getTime()/1000;
+        unix2 = $scope.date2.getTime() / 1000;
       }
       $scope.date1 = $scope.article[$scope.calculator.startingDate.key].value;
       unix1 = $scope.date1.getTime() / 1000;
-      $scope.diff = Math.ceil((unix2 - unix1) / (60*60*25));
+      $scope.diff = Math.ceil((unix2 - unix1) / (60 * 60 * 25));
       console.log($scope.diff);
-      if($scope.diff < 0 ){
+      if ($scope.diff < 0) {
         $scope.calc1Error = true;
-      }
-      else{
+      } else {
         $scope.calc1Error = false;
       }
     };
-    
+
     $scope.formatString = function(format) {
-      var day   = parseInt(format.substring(0,2));
-      var month  = parseInt(format.substring(3,5));
-      var year   = parseInt(format.substring(6,10));
-      var date = new Date(year, month-1, day);
+      var day = parseInt(format.substring(0, 2));
+      var month = parseInt(format.substring(3, 5));
+      var year = parseInt(format.substring(6, 10));
+      var date = new Date(year, month - 1, day);
       return date;
     };
-    
-    $scope.pushToEndingDate = function(){
-      
+
+    $scope.pushToEndingDate = function() {
+
     };
-    
+
     $scope.printDiv = function(note) {
       var popupWin = window.open('', '_blank', 'width=500,height=500');
       var date = $filter('date')(note.date, "MM/dd/yyyy mm:HH");
-      var content = "<br><div style=''><b>On:</b> " + date + "<br> <b>To:</b> " + note.to + "<br> <b>cc: </b>" + note.cc + "<br> <b>bcc:</b> " + note.bcc + "<br><b>Subject:</b>" + note.title +"<br> <b>Content:</b> <br>" + note.content + "</div>";
+      var content = "<br><div style=''><b>On:</b> " + date + "<br> <b>To:</b> " + note.to + "<br> <b>cc: </b>" + note.cc + "<br> <b>bcc:</b> " + note.bcc + "<br><b>Subject:</b>" + note.title + "<br> <b>Content:</b> <br>" + note.content + "</div>";
       popupWin.document.open();
       popupWin.document.write('<html><head><link rel="stylesheet" type="text/css" href="style.css" /></head><body onload="window.print()">' + content + '</body></html>');
       popupWin.document.close();
     };
-    
-    $scope.loadlegacy = function(i){
+
+    $scope.loadlegacy = function(i) {
       console.log(i);
-      if(i.created === "")
+      if (i.created === "")
         return;
       $scope.article_sort = sortFields(i);
       console.log($scope.legacy, i);
       $scope.isLegacy = true;
     };
-    
-    $scope.disableLegacy = function(){
+
+    $scope.disableLegacy = function() {
       $scope.article_sort = sortFields($scope.article);
       $scope.isLegacy = false;
     };
-    
-    $scope.createLegacy = function(i){
-      if(i !=="LEGACY")
+
+    $scope.createLegacy = function(i) {
+      if (i !== "LEGACY")
         return;
       $scope.loading = true;
-      $http.get('/api/articles/addlegacy/'+$scope.article._id).
-          then(function(response) {
-            $scope.loading = false;
-            toastr.success('Legacy Created');
-            $scope.article = response.data;
-            $scope.legacy.push("");
-            $scope.article_sort = sortFields($scope.article);
-            for(var k in $scope.article_sort ){
-              if($scope.article_sort[k].id.category !== "Contact"){
-                if($scope.article_sort[k].id.type !== "date" )
-                  $scope.article_sort[k].value = "";
-                else
-                  $scope.article_sort[k].value = null;
-              }
+      $http.get('/api/articles/addlegacy/' + $scope.article._id)
+        .then(function(response) {
+          $scope.loading = false;
+          toastr.success('Legacy Created');
+          $scope.article = response.data;
+          $scope.legacy.push("");
+          $scope.article_sort = sortFields($scope.article);
+          for (var k in $scope.article_sort) {
+            if ($scope.article_sort[k].id.category !== "Contact") {
+              if ($scope.article_sort[k].id.type !== "date")
+                $scope.article_sort[k].value = "";
+              else
+                $scope.article_sort[k].value = null;
             }
-          }, function(response) {
-            $scope.loading = false;
-            toastr.error('To Many Legacies');
           }
-      );  
+        }, function(response) {
+          $scope.loading = false;
+          toastr.error('To Many Legacies');
+        });
     };
-    
-    $scope.onFile = function(re){
+
+    $scope.onFile = function(re) {
       console.log(re.file);
-      if(!re.file)
+      if (!re.file)
         return;
       $scope.note.files.push(re.file);
       $scope.emailAttachment.push(re.file);
     };
-    
-    $scope.onFileNote = function(re){
+
+    $scope.onFileNote = function(re) {
       console.log(re.file);
-      if(!re.file)
+      if (!re.file)
         return;
       $scope.editNote.files.push(re.file);
     };
-    
-    $scope.onFileNote2 = function(re){
+
+    $scope.onFileNote2 = function(re) {
       console.log(re.file);
-      if(!re.file)
+      if (!re.file)
         return;
       $scope.newNote.filesShow.push(re.file);
       $scope.newNote.files.push(re.file._id);
     };
-      
-      //function for the page
-      //$scope.splitFields();
-      $scope.updateAllNotes();
-      $scope.getFiles();
-      $scope.emailExport();
-      addFields();
-      tickPremissions();
-    
-}]);
+
+    //function for the page
+    //$scope.splitFields();
+    $scope.updateAllNotes();
+    $scope.getFiles();
+    $scope.emailExport();
+    addFields();
+    tickPremissions();
+  }
+]);
+
 'use strict';
 
 // Articles controller
-angular.module('articles').controller('articleController', ['$scope', '$stateParams', '$location', 'Authentication', 'Articles','$http','ngDialog','$timeout','toastr', 'FileUploader','$rootScope','$filter','$sce',
-  function ($scope, $stateParams, $location, Authentication, Articles, $http, ngDialog, $timeout, toastr, FileUploader, $rootScope, $filter, $sce) {
+angular.module('articles').controller('articleController', ['$scope', '$state', '$stateParams', '$location', 'Authentication', 'Articles', '$http', 'ngDialog', '$timeout', 'toastr', 'FileUploader', '$rootScope', '$filter', '$sce',
+  function($scope, $state, $stateParams, $location, Authentication, Articles, $http, ngDialog, $timeout, toastr, FileUploader, $rootScope, $filter, $sce) {
     $scope.authentication = Authentication;
     $scope.fields = []; // a var to hold all the posible fields
     $scope.smartList = []; // a var to old the smart search params
@@ -1517,195 +1627,201 @@ angular.module('articles').controller('articleController', ['$scope', '$statePar
     var date = new Date();
     var claim;
     $scope.minDate = date.setDate((new Date()).getDate());
-    $scope.newDate = function(date){
+    $scope.newDate = function(date) {
       return new Date(date);
     };
     $scope.tableOrder = [];
-    
-    
+
+    $scope.bAllowedToChangeCaseInfo = 'XXX';
+    $timeout(function() {
+      $scope.$apply(function() {
+        $scope.bAllowedToChangeCaseInfo = 'YYY';
+      });
+    }, 500);
+    // if ($scope.authentication.user.roles.indexOf('admin2') !== -1 || $scope.authentication.user.roles.indexOf('admin') !== -1)
+    //   $scope.bAllowedToChangeCaseInfo = true;
+
+    console.log('Allowed', $scope.bAllowedToChangeCaseInfo);
+
     // Filter _id, user, and __v
-    $scope.catFilter = function (cat) { 
-    return cat === 'Contact'; 
+    $scope.catFilter = function(cat) {
+      return cat === 'Contact';
     };
-    
+
     //change the current line params
-    $scope.smartSearchParams = function(type){
+    $scope.smartSearchParams = function(type) {
       $scope.smartSearch.type = type;
       console.log("type: " + type);
     };
-    
-    $scope.onFile = function(file){
+
+    $scope.onFile = function(file) {
       console.log(file);
     };
-    
-    $scope.getFields = function(){
+
+    $scope.getFields = function() {
       $http.get('/api/fields/all-fields').
-        then(function(response) {
-          //console.log(response.data);
-          $scope.fields  = response.data;
+      then(function(response) {
+          $scope.fields = response.data;
           $rootScope.fields = response.data;
           $scope.requiredFileds = [];
           $scope.otherFileds = [];
-          
-          for(var k in $scope.fields){
-            if(k === "_id" || k === "user")
+
+          for (var k in $scope.fields) {
+            if (k === "_id" || k === "user")
               continue;
-            if($scope.fields[k].category === "Contact"){
+            if ($scope.fields[k].category === "Contact") {
               $scope.requiredFileds.push($scope.fields[k]);
-            }
-            else
+            } else
               $scope.otherFileds.push($scope.fields[k]);
           }
-          
-          for(var j in response.data){
-             var found = false;
-             for(var i in $scope.cats){
-               if($scope.cats[i] === response.data[j].category)
-                 found = true;
-             }
-             if(found === false)
-               $scope.cats.push(response.data[j].category);
-           }
 
-          
+          for (var j in response.data) {
+            var found = false;
+            for (var i in $scope.cats) {
+              if ($scope.cats[i] === response.data[j].category)
+                found = true;
+            }
+            if (found === false)
+              $scope.cats.push(response.data[j].category);
+          }
+
+
         }, function(response) {
           $scope.data = response.data || "Request failed";
         }
-        
-        ); 
+
+      );
     };
     $scope.getFields();
-    
-    $scope.getUsers = function(){
-      if($scope.authentication.user.roles.indexOf("admin") === -1)
-          return;
+
+    $scope.getUsers = function() {
+      if ($scope.authentication.user.roles.indexOf("admin") === -1 && $scope.authentication.user.roles.indexOf("admin2") === -1)
+        return;
       $http.get('/api/users').
-        then(function(response) {
+      then(function(response) {
           $scope.users = response.data;
           $rootScope.users = response.data;
-          
+
         }, function(response) {
           console.log(response);
         }
-        
-        ); 
-        $scope.example1model = []; 
+
+      );
+      $scope.example1model = [];
     };
     $scope.getUsers();
-    
-    $scope.addLineToSmartSearch = function(){
+
+    $scope.addLineToSmartSearch = function() {
       //console.log($scope.smartSearch.currentField);
       /*if($scope.smartSearch.currentField === undefined){
         toastr.warning("Please select searching field");
         return;
-      }*/    
-      if($scope.smartSearch.option === "" || !$scope.smartSearch.option){
+      }*/
+      if ($scope.smartSearch.option === "" || !$scope.smartSearch.option) {
         toastr.warning("Please select searching option");
         return;
       }
-      
-      if($scope.smartSearch.currentField === "" || !$scope.smartSearch.currentField){
+
+      if ($scope.smartSearch.currentField === "" || !$scope.smartSearch.currentField) {
         toastr.warning("Please select field");
         return;
       }
-      
-      if($scope.smartSearch.input === "" || !$scope.smartSearch.input){
+
+      if ($scope.smartSearch.input === "" || !$scope.smartSearch.input) {
         toastr.warning("Please insert a date/text");
         return;
       }
       $scope.smartList.push({
-        "type"  : $scope.smartSearch.currentField.type,
-        "field" : $scope.smartSearch.currentField.key,
-        "link"  : $scope.smartSearch.link,
+        "type": $scope.smartSearch.currentField.type,
+        "field": $scope.smartSearch.currentField.key,
+        "link": $scope.smartSearch.link,
         "option": $scope.smartSearch.option,
-        "text"  : $scope.smartSearch.input,
-        "fieldName"  : $scope.smartSearch.currentField.name
+        "text": $scope.smartSearch.input,
+        "fieldName": $scope.smartSearch.currentField.name
       });
       $scope.smartSearch.field = "";
       $scope.smartSearch.option = "";
       $scope.smartSearch.currentField = "";
       $scope.smartSearch.input = "";
-      
+
     };
-    
-    $scope.removeFromSmartList = function(index){
+
+    $scope.removeFromSmartList = function(index) {
       console.log(index);
       $scope.smartList.splice(index, 1);
     };
-    
-    $scope.doSmartSearch = function(){
-      if($scope.smartList.length  < 1){
+
+    $scope.doSmartSearch = function() {
+      if ($scope.smartList.length < 1) {
         toastr.warning("Please insert at list one searching row");
         return;
       }
       $scope.search = true;
       var found = false;
-      for(var k in $scope.smartList){
-        if($scope.smartList[k].field === "DateClosedFocusInformation")
+      for (var k in $scope.smartList) {
+        if ($scope.smartList[k].field === "DateClosedFocusInformation")
           found = true;
       }
-      if(!found){
+      if (!found) {
         $scope.smartList.push({
-          "field"  : "closed",
-          "text"  : $scope.closed
+          "field": "closed",
+          "text": $scope.closed
         });
       }
       $http.post('/api/articles/smart-search', $scope.smartList).
-        then(function(response) {
-          $scope.smartList.pop();
-          $scope.search = false;
-          if(response.data.length === 0)
-            toastr.warning("No Claimants Found");
-          else
-            toastr.info(response.data.length + " Claimants Found");
-          console.log(response.data);
-          for(var k in response.data){
-            for(var i in response.data[k]){
-              if(response.data[k][i].id && response.data[k][i].id.type === "date"){
-                response.data[k][i].value = new Date(response.data[k][i].value);
-                if(response.data[k][i].value.getTime() === 0)
-                  response.data[k][i].value = "";
-              }
+      then(function(response) {
+        $scope.smartList.pop();
+        $scope.search = false;
+        if (response.data.length === 0)
+          toastr.warning("No Claimants Found");
+        else
+          toastr.info(response.data.length + " Claimants Found");
+        console.log(response.data);
+        for (var k in response.data) {
+          for (var i in response.data[k]) {
+            if (response.data[k][i].id && response.data[k][i].id.type === "date") {
+              response.data[k][i].value = new Date(response.data[k][i].value);
+              if (response.data[k][i].value.getTime() === 0)
+                response.data[k][i].value = "";
             }
           }
-          $scope.articles = response.data;
-        }, function(response) {
-          
-          $scope.data = response.data || "Request failed";
         }
-      ); 
+        $scope.articles = response.data;
+      }, function(response) {
+
+        $scope.data = response.data || "Request failed";
+      });
     };
-    
-    $scope.create = function (isValid) {
+
+    $scope.create = function(isValid) {
       $scope.error = null;
       //console.log(this);
       // Create new Article object
-      var fields = {
-      };
+      var fields = {};
       fields.data = [];
       fields.permissions = [];
       var permissions = [];
-      for(var k in $scope.fields){
+      for (var k in $scope.fields) {
         var v;
-        if(typeof $scope.fields[k].undefined !== "undefined" || $scope.fields[k].undefined === ""){
+        if (typeof $scope.fields[k].undefined !== "undefined" || $scope.fields[k].undefined === "") {
           v = $scope.fields[k].undefined;
-        }else
+        } else
           v = " ";
         //console.log($scope.fields[k].name);
         //console.log({value: v, category: $scope.fields[k].category, key : $scope.fields[k].key, type: $scope.fields[k].type, name: $scope.fields[k].name, order: $scope.fields[k].order});  
         //fields.push({value: v, category: $scope.fields[k].category, key : $scope.fields[k].key, type: $scope.fields[k].type, name: $scope.fields[k].name, order: $scope.fields[k].order});
-        if($scope.fields[k].key === 'ClaimContact'){
-          fields.data.push({value: claim, id:  $scope.fields[k]._id, key : $scope.fields[k].key});
+        if ($scope.fields[k].key === 'ClaimContact') {
+          fields.data.push({ value: claim, id: $scope.fields[k]._id, key: $scope.fields[k].key });
         } else {
-          fields.data.push({value: v, id:  $scope.fields[k]._id, key : $scope.fields[k].key});
+          fields.data.push({ value: v, id: $scope.fields[k]._id, key: $scope.fields[k].key });
         }
       }
-      
-      for(var k in $scope.permissions){
+
+      for (var k in $scope.permissions) {
         permissions.push($scope.permissions[k]._id);
       }
       fields.permissions = permissions;
-    
+
       //console.log($scope.fields);
       // Redirect after save
       /*
@@ -1717,20 +1833,20 @@ angular.module('articles').controller('articleController', ['$scope', '$statePar
         toastr.error('Error adding Claimant');
       });
     }; */
-    for(var k in $scope.fields){
-      $scope.fields[k].undefined = "";
-    }
-     $http.post('/api/articles', fields).
-        then(function(response) {
-          toastr.success('New Claimant added');
-        }, function(response) {
-          toastr.error('Error adding Claimant');
-          $scope.data = response.data || "Request failed";
-        }
-      ); 
+      for (var k in $scope.fields) {
+        $scope.fields[k].undefined = "";
+      }
+      $http.post('/api/articles', fields).
+      then(function(response) {
+        toastr.success('New Claimant added');
+        $state.go('articles.create', {}, { reload: true });
+      }, function(response) {
+        toastr.error('Error adding Claimant');
+        $scope.data = response.data || "Request failed";
+      });
     };
-          
-    $scope.remove = function (article) {
+
+    $scope.remove = function(article) {
       if (article) {
         article.$remove();
 
@@ -1740,23 +1856,23 @@ angular.module('articles').controller('articleController', ['$scope', '$statePar
           }
         }
       } else {
-        $scope.article.$remove(function () {
+        $scope.article.$remove(function() {
           $location.path('articles');
         });
       }
-    };  
-   
-    $scope.find = function (all) {
+    };
+
+    $scope.find = function(all) {
       var search = {};
-      if(!all){
-        for(var k in $scope.requiredFileds){
-          if($scope.requiredFileds[k].value !== undefined && $scope.requiredFileds[k].value !== "")
+      if (!all) {
+        for (var k in $scope.requiredFileds) {
+          if ($scope.requiredFileds[k].value !== undefined && $scope.requiredFileds[k].value !== "")
             search[$scope.requiredFileds[k].key] = {
-              "value" : $scope.requiredFileds[k].value,
-              "type" : $scope.requiredFileds[k].type
+              "value": $scope.requiredFileds[k].value,
+              "type": $scope.requiredFileds[k].type
             };
         }
-        if(Object.keys(search).length === 0){
+        if (Object.keys(search).length === 0) {
           toastr.warning("Please fill up at list one field");
           return;
         }
@@ -1765,133 +1881,129 @@ angular.module('articles').controller('articleController', ['$scope', '$statePar
       $scope.search = true;
       //console.log(search);
       $http.post('/api/articles/search', search).
-        then(function(response) {
-          $scope.search = false;
-          for(var k in response.data){
-            for(var i in response.data[k]){
-              if(response.data[k][i].id && response.data[k][i].id.type === "date"){
-                response.data[k][i].value = new Date(response.data[k][i].value);
-                if(response.data[k][i].value.getTime() === 0)
-                  response.data[k][i].value = "";
-              }
+      then(function(response) {
+        $scope.search = false;
+        for (var k in response.data) {
+          for (var i in response.data[k]) {
+            if (response.data[k][i].id && response.data[k][i].id.type === "date") {
+              response.data[k][i].value = new Date(response.data[k][i].value);
+              if (response.data[k][i].value.getTime() === 0)
+                response.data[k][i].value = "";
             }
           }
-          
-          $scope.articles = [];
-          $scope.articles = response.data;
-          if(response.data.length === 0)
-            toastr.warning("No Claimants Found");
-          else
-            toastr.info(response.data.length + " Claimants Found");
-         
-        }, function(response) {
-          
-          $scope.data = response.data || "Request failed";
         }
-      );
-      getSearchHistory();  
-    };   
 
-    $scope.findOne = function () {
+        $scope.articles = [];
+        $scope.articles = response.data;
+        if (response.data.length === 0)
+          toastr.warning("No Claimants Found");
+        else
+          toastr.info(response.data.length + " Claimants Found");
+
+      }, function(response) {
+
+        $scope.data = response.data || "Request failed";
+      });
+      getSearchHistory();
+    };
+
+    $scope.findOne = function() {
       $scope.article = Articles.get({
         articleId: $stateParams.articleId
       });
     };
-    
+
     $scope.filterArticles = function() {
       var result = {};
       angular.forEach($scope.articles, function(value, key) {
-          if (!value.hasOwnProperty('secId')) {
-              result[key] = value;
-          }
+        if (!value.hasOwnProperty('secId')) {
+          result[key] = value;
+        }
       });
       console.log(result);
       return result;
     };
-    
-    $scope.editArticle = function (article, cats) {
+
+    $scope.editArticle = function(article, cats) {
       //$scope.editArticle = article;
-      $scope.dialog = ngDialog.open({            
+      $scope.dialog = ngDialog.open({
         template: 'editArticle',
-        data:{
+        data: {
           'article': article,
-          'cats'   : cats,
-          'users'  : $scope.users,
-          'fields' : $scope.fields
-          
+          'cats': cats,
+          'users': angular.copy($scope.users),
+          'fields': $scope.fields
         },
         controller: 'articleActionController',
         closeByEscape: true,
         showClose: false,
         closeByDocument: false,
-        className: 'ngdialog-overlay ngdialog-custom',
+        className: 'ngdialog-overlay ngdialog-custom dialog-medium-size',
         overlay: false,
-        
+
       });
       $scope.dialog.setPadding = 15;
-    }; 
-    
-    function getSearchHistory(){
+    };
+
+    function getSearchHistory() {
       $http.get('/api/articles/searchhistory').
-        then(function(response) {
-          $scope.searchHistory = response.data;
-        }, function(response) {
-          
-        }
-      ); 
+      then(function(response) {
+        $scope.searchHistory = response.data;
+      }, function(response) {
+
+      });
     }
-    
-    $scope.adaptSearchHistory = function(){
-      if(!$scope.searchSelect)
+
+    $scope.adaptSearchHistory = function() {
+      if (!$scope.searchSelect)
         return;
       var params = $scope.searchSelect.params;
       console.log(params);
-      for(var k in $scope.requiredFileds){
+      for (var k in $scope.requiredFileds) {
         $scope.requiredFileds[k].value = "";
       }
-      for(var k in params){
-        for(var j in $scope.requiredFileds){
-          if($scope.requiredFileds[j].key === k && $scope.requiredFileds[j].type === params[k].type){
-            if(params[k].type === "date"){
-                $scope.requiredFileds[j].value = new Date(params[k].value);
-              } else {
-                $scope.requiredFileds[j].value = params[k].value;
+      for (var k in params) {
+        for (var j in $scope.requiredFileds) {
+          if ($scope.requiredFileds[j].key === k && $scope.requiredFileds[j].type === params[k].type) {
+            if (params[k].type === "date") {
+              $scope.requiredFileds[j].value = new Date(params[k].value);
+            } else {
+              $scope.requiredFileds[j].value = params[k].value;
             }
-          } 
+          }
         }
       }
     };
-    
-    $scope.checkClaim = function(i){
+
+    $scope.checkClaim = function(i) {
       claim = i;
-      if(i === null || i === "")
+      if (i === null || i === "")
         return;
-      $http.get('/api/articles/checkclain/'+i).
+      $http.get('/api/articles/checkclain/' + i).
       then(function(response) {
-          console.log(response.data);
-          if(response.data){
-            $scope.claimCheck = false;
-          }
-          else{
-            $scope.claimCheck = true;
-            toastr.warning("Claim is not unique");
-          }
-        }, function(response) {
-          console.log(response);
+        console.log(response.data);
+        if (response.data) {
+          $scope.claimCheck = false;
+        } else {
+          $scope.claimCheck = true;
+          toastr.warning("Claim is not unique");
         }
-      ); 
+      }, function(response) {
+        console.log(response);
+      });
     };
-    
-    
-    $scope.changeSide = function(id){
+
+
+    $scope.changeSide = function(id) {
       $scope.xxx = id;
     };
 
 
 
     getSearchHistory();
-    
-  }]);
+
+  }
+]);
 
 angular.module('articles').controller('bulkController', ['$scope', '$location', 'Articles','$http', 'Authentication','FileUploader','toastr','$filter','$window','ngDialog','fileUpload','$sce',
   function($scope, $location, Articles, $http, Authentication, FileUploader,toastr, $filter, $window, ngDialog, fileUpload, $sce){
@@ -2379,127 +2491,125 @@ angular.module('articles').filter('trusted', ['$sce', function ($sce) {
 }]);
 'use strict';
 // Configuring the Calendar module
-angular.module('calendar',['ngDialog','ui.mask','ui.bootstrap','ui.calendar','ngMaterial']).run(['Menus',
-  function (Menus) {
+angular.module('calendar', ['ngDialog', 'ui.mask', 'ui.bootstrap', 'ui.calendar', 'ngMaterial']).run(['Menus',
+  function(Menus) {
     // Add the calendar dropdown item
     Menus.addMenuItem('topbar', {
       title: 'Calendar',
       state: 'calendar',
       type: 'dropdown',
-      roles: ['admin','user']
+      roles: ['user', 'user2', 'admin2', 'admin']
     });
 
     // Add the dropdown create item
     Menus.addSubMenuItem('topbar', 'calendar', {
       title: 'Show Calendar',
       state: 'calendar.list',
-      roles: ['user', 'admin']
+      roles: ['user', 'user2', 'admin2', 'admin']
     });
   }
 ]);
 
 
 
-angular.module('calendar').config(["$provide", function($provide){
-    $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions){
-        // $delegate is the taOptions we are decorating
-        // register the tool with textAngular
-        taRegisterTool('colourRed', {
-            iconclass: "fa fa-square red",
-            action: function(){
-                this.$editor().wrapSelection('forecolor', 'red');
-            }
-        });
-        // add the button to the default toolbar definition
-        taOptions.toolbar[1].push('colourRed');
-        return taOptions;
-    }]);
+angular.module('calendar').config(["$provide", function($provide) {
+  $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions) {
+    // $delegate is the taOptions we are decorating
+    // register the tool with textAngular
+    taRegisterTool('colourRed', {
+      iconclass: "fa fa-square red",
+      action: function() {
+        this.$editor().wrapSelection('forecolor', 'red');
+      }
+    });
+    // add the button to the default toolbar definition
+    taOptions.toolbar[1].push('colourRed');
+    return taOptions;
+  }]);
 }]);
 
-angular.module('calendar').config(["$provide", function($provide){
-    $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions){
-        // $delegate is the taOptions we are decorating
-        // register the tool with textAngular
-        taRegisterTool('colourBlue', {
-            iconclass: "fa fa-square blue",
-            action: function(){
-                this.$editor().wrapSelection('forecolor', 'blue');
-            }
-        });
-        // add the button to the default toolbar definition
-        taOptions.toolbar[1].push('colourBlue');
-        return taOptions;
-    }]);
+angular.module('calendar').config(["$provide", function($provide) {
+  $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions) {
+    // $delegate is the taOptions we are decorating
+    // register the tool with textAngular
+    taRegisterTool('colourBlue', {
+      iconclass: "fa fa-square blue",
+      action: function() {
+        this.$editor().wrapSelection('forecolor', 'blue');
+      }
+    });
+    // add the button to the default toolbar definition
+    taOptions.toolbar[1].push('colourBlue');
+    return taOptions;
+  }]);
 }]);
 
-angular.module('calendar').config(["$provide", function($provide){
-    $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions){
-        // $delegate is the taOptions we are decorating
-        // register the tool with textAngular
-        taRegisterTool('colourGreen', {
-            iconclass: "fa fa-square green",
-            action: function(){
-                this.$editor().wrapSelection('forecolor', 'green');
-            }
-        });
-        // add the button to the default toolbar definition
-        taOptions.toolbar[1].push('colourGreen');
-        return taOptions;
-    }]);
+angular.module('calendar').config(["$provide", function($provide) {
+  $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions) {
+    // $delegate is the taOptions we are decorating
+    // register the tool with textAngular
+    taRegisterTool('colourGreen', {
+      iconclass: "fa fa-square green",
+      action: function() {
+        this.$editor().wrapSelection('forecolor', 'green');
+      }
+    });
+    // add the button to the default toolbar definition
+    taOptions.toolbar[1].push('colourGreen');
+    return taOptions;
+  }]);
 }]);
 
-angular.module('calendar').config(["$provide", function($provide){
-    $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions){
-        // $delegate is the taOptions we are decorating
-        // register the tool with textAngular
-        taRegisterTool('colourGrey', {
-            iconclass: "fa fa-square grey",
-            action: function(){
-                this.$editor().wrapSelection('forecolor', 'grey');
-            }
-        });
-        // add the button to the default toolbar definition
-        taOptions.toolbar[1].push('colourGrey');
-        return taOptions;
-    }]);
+angular.module('calendar').config(["$provide", function($provide) {
+  $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions) {
+    // $delegate is the taOptions we are decorating
+    // register the tool with textAngular
+    taRegisterTool('colourGrey', {
+      iconclass: "fa fa-square grey",
+      action: function() {
+        this.$editor().wrapSelection('forecolor', 'grey');
+      }
+    });
+    // add the button to the default toolbar definition
+    taOptions.toolbar[1].push('colourGrey');
+    return taOptions;
+  }]);
 }]);
 
-angular.module('calendar').config(["$provide", function($provide){
-    $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions){
-        // $delegate is the taOptions we are decorating
-        // register the tool with textAngular
-        taRegisterTool('colouryellow', {
-            iconclass: "fa fa-square yellow",
-            action: function(){
-                this.$editor().wrapSelection('forecolor', '#F6911E');
-            }
-        });
-        // add the button to the default toolbar definition
-        taOptions.toolbar[1].push('colouryellow');
-        return taOptions;
-    }]);
-}]);
-
-
-
-
-angular.module('calendar').config(["$provide", function($provide){
-    $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions){
-        // $delegate is the taOptions we are decorating
-        // register the tool with textAngular
-        taRegisterTool('colourgreyblue', {
-            iconclass: "fa fa-square yellow greyb",
-            action: function(){
-                this.$editor().wrapSelection('forecolor', '#8496BA');
-            }
-        });
-        // add the button to the default toolbar definition
-        taOptions.toolbar[1].push('colourgreyblue');
-        return taOptions;
-    }]);
+angular.module('calendar').config(["$provide", function($provide) {
+  $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions) {
+    // $delegate is the taOptions we are decorating
+    // register the tool with textAngular
+    taRegisterTool('colouryellow', {
+      iconclass: "fa fa-square yellow",
+      action: function() {
+        this.$editor().wrapSelection('forecolor', '#F6911E');
+      }
+    });
+    // add the button to the default toolbar definition
+    taOptions.toolbar[1].push('colouryellow');
+    return taOptions;
+  }]);
 }]);
 
 
+
+
+angular.module('calendar').config(["$provide", function($provide) {
+  $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions) {
+    // $delegate is the taOptions we are decorating
+    // register the tool with textAngular
+    taRegisterTool('colourgreyblue', {
+      iconclass: "fa fa-square yellow greyb",
+      action: function() {
+        this.$editor().wrapSelection('forecolor', '#8496BA');
+      }
+    });
+    // add the button to the default toolbar definition
+    taOptions.toolbar[1].push('colourgreyblue');
+    return taOptions;
+  }]);
+}]);
 
 'use strict';
 
@@ -2517,7 +2627,7 @@ angular.module('calendar').config(['$stateProvider',
         templateUrl: 'modules/calendar/client/views/calendar.client.view.html',
         url: '/',
         data: {
-          roles: ['user', 'admin']
+          roles: ['user', 'user2', 'admin2', 'admin']
         }
       });
   }
@@ -2638,9 +2748,14 @@ angular.module('calendar').controller('CalendarController', ['$scope', '$statePa
       calendar:{
         height: 1000,
         editable: true,
+        // header:{
+        //   left: 'title',
+        //   center: '',
+        //   right: 'today prev,next'
+        // },
         header:{
-          left: 'title',
-          center: '',
+          left: 'month basicWeek basicDay',
+          center: 'title',
           right: 'today prev,next'
         },
         eventClick: $scope.alertOnEventClick,
@@ -3088,15 +3203,16 @@ angular.module('core').controller('HeaderController', ['$scope', '$state', 'Auth
 'use strict';
 
 angular.module('core').controller('HomeController', ['$scope', '$location', 'Authentication',
-  function ($scope, $location, Authentication) {
+  function($scope, $location, Authentication) {
     // This provides Authentication context.
     $scope.authentication = Authentication;
     console.log($scope.authentication);
-    if($scope.authentication.user === "")
+    if ($scope.authentication.user === "")
       $location.path('/');
-    else
+    else if ($scope.authentication.user.roles.indexOf('admin1') === -1)
       $location.path('/articles/list');
-    
+    else
+      $location.path('/articles/create');
   }
 ]);
 
@@ -3443,21 +3559,21 @@ angular.module('exports').config(['$stateProvider',
         url: '/create',
         templateUrl: 'modules/exports/client/views/create-article.client.view.html',
         data: {
-          roles: ['user', 'admin']
+          roles: ['user', 'user2', 'admin1', 'admin2', 'admin']
         }
       })
       .state('exports.edit', {
         url: '/:articleId/edit',
         templateUrl: 'modules/exports/client/views/edit-article.client.view.html',
         data: {
-          roles: ['user', 'admin']
+          roles: ['user', 'user2', 'admin1', 'admin2', 'admin']
         }
       })
       .state('exports.diplicates', {
         url: '/duplicates',
         templateUrl: 'modules/exports/client/views/duplicates.client.view.html',
         data: {
-          roles: ['admin']
+          roles: ['admin1', 'admin2', 'admin']
         }
       });
   }
@@ -3513,17 +3629,17 @@ angular.module('exports').controller('ExportsController', ['$scope', '$statePara
   $scope.smartList = [];
   $scope.cats = [];
   
-    $scope.csv = function(note){
+    $scope.csv = function(part){
       $scope.spinner = true;
-      $http.get('/api/exports/contacttocsv').
+      $http.get('/api/exports/contacttocsv/' + part).
         then(function(response) {
           $scope.spinner = false;
-          console.log(response);
           var blob = new Blob([response.data], { type: "application/CSV"});
-          var fileName = "test.csv";
+          var fileName = "Contacts-Part-" + part + ".csv";
           saveAs(blob, fileName);
         }, function(response) {
-
+          $scope.spinner = false;
+          toastr.warning("Error exporting CSV");
         }
         );  
     };
@@ -3688,14 +3804,14 @@ angular.module('library',['ngDialog','ui.mask','ngMaterial']).run(['Menus',
       title: 'Library',
       state: 'library',
       type: 'dropdown',
-      roles: ['admin','user']
+      roles: ['user2', 'admin2', 'admin']
     });
 
     // Add the dropdown create item
     Menus.addSubMenuItem('topbar', 'library', {
       title: 'Show library',
       state: 'library.list',
-      roles: ['user', 'admin']
+      roles: ['user2', 'admin2', 'admin']
     });
   }
 ]);
@@ -3716,7 +3832,7 @@ angular.module('library').config(['$stateProvider',
         templateUrl: 'modules/library/client/views/library.client.view.html',
         url: '/',
         data: {
-          roles: ['user', 'admin']
+          roles: ['user2', 'admin2', 'admin']
         }
       });
   }
@@ -3915,7 +4031,7 @@ angular.module('template',['ngDialog','ui.mask','ngMaterial','ngAnimate','ngAria
       title: 'Templates',
       state: 'templates',
       type: 'dropdown',
-      roles: ['admin']
+      roles: ['user', 'user2', 'admin2', 'admin']
     });
     
 
@@ -3923,14 +4039,14 @@ angular.module('template',['ngDialog','ui.mask','ngMaterial','ngAnimate','ngAria
     Menus.addSubMenuItem('topbar', 'templates', {
       title: 'Templates',
       state: 'templates.list',
-      roles: ['admin']
+      roles: ['user', 'user2', 'admin2', 'admin']
     });
 
     // Add the dropdown create item
     Menus.addSubMenuItem('topbar', 'templates', {
       title: 'Create',
       state: 'templates.create',
-      roles: ['admin']
+      roles: ['user', 'user2', 'admin2', 'admin']
     });
     
   }
@@ -3957,7 +4073,7 @@ angular.module('template').config(['$stateProvider',
         url: '/create',
         templateUrl: 'modules/templates/client/views/templates-create.client.view.html',
         data: {
-          roles: ['admin']
+          roles: ['user', 'user2', 'admin2', 'admin']
         }
       })
       .state('templates.edit', {
@@ -4215,7 +4331,7 @@ angular.module('users').config(['$stateProvider',
         url: '/settings',
         templateUrl: 'modules/users/client/views/settings/settings.client.view.html',
         data: {
-          roles: ['user', 'admin']
+          roles: ['user', 'user2', 'admin1', 'admin2', 'admin']
         }
       })
       .state('settings.profile', {
@@ -4289,6 +4405,8 @@ angular.module('users').config(['$stateProvider',
 
 angular.module('users.admin').controller('UserListController', ['$scope', '$filter', 'Admin',
   function ($scope, $filter, Admin) {
+    $scope.bPagination = false;
+
     Admin.query(function (data) {
       $scope.users = data;
       $scope.buildPager();
@@ -4296,12 +4414,14 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
 
     $scope.buildPager = function () {
       $scope.pagedItems = [];
-      $scope.itemsPerPage = 15;
+      $scope.itemsPerPage = 10;
       $scope.currentPage = 1;
       $scope.figureOutItemsToDisplay();
     };
 
     $scope.figureOutItemsToDisplay = function () {
+      $scope.bPagination = false;
+      
       $scope.filteredItems = $filter('filter')($scope.users, {
         $: $scope.search
       });
@@ -4309,6 +4429,8 @@ angular.module('users.admin').controller('UserListController', ['$scope', '$filt
       var begin = (($scope.currentPage - 1) * $scope.itemsPerPage);
       var end = begin + $scope.itemsPerPage;
       $scope.pagedItems = $scope.filteredItems.slice(begin, end);
+
+      $scope.bPagination = true;
     };
 
     $scope.pageChanged = function () {
@@ -4323,6 +4445,20 @@ angular.module('users.admin').controller('UserController', ['$scope', '$state', 
   function ($scope, $state, Authentication, userResolve) {
     $scope.authentication = Authentication;
     $scope.user = userResolve;
+
+    $scope.roles = {
+      'admin': 'Super Admin',
+      // 'admin1': 'Admin1',
+      'admin2': 'Admin1',
+      'user': 'User1',
+      'user2': 'User2'
+    };    
+
+    $scope.user.$promise.then(function(v){
+      $scope.user.block = v.block.toString();
+      $scope.user.valid = v.valid.toString();
+      $scope.user.roles = v.roles[0];
+    });
 
     $scope.remove = function (user) {
       if (confirm('Are you sure you want to delete this user?')) {
@@ -4354,6 +4490,10 @@ angular.module('users.admin').controller('UserController', ['$scope', '$state', 
         $scope.error = errorResponse.data.message;
       });
     };
+
+    $scope.getRoleName = function (role) {
+      return $scope.roles[role];
+    }
   }
 ]);
 
@@ -4382,11 +4522,16 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$stat
       }
 
       $http.post('/api/auth/signup', $scope.credentials).success(function (response) {
-        // If successful we assign the response to the global user model
-        $scope.authentication.user = response;
+        // // If successful we assign the response to the global user model
+        // $scope.authentication.user = response;
 
-        // And redirect to the previous or home page
-        $state.go($state.previous.state.name || 'home', $state.previous.params);
+        // // And redirect to the previous or home page
+        // $state.go($state.previous.state.name || 'home', $state.previous.params);
+         
+        if (!response.valid) {
+          toastr.info(response.message);
+          // $state.go('home');
+        }
       }).error(function (response) {
         $scope.error = response.message;
       });

@@ -39,6 +39,10 @@ exports.invokeRolesPolicies = function() {
   }, {
     roles: ['admin1', 'admin2', 'admin'],
     allows: [{
+      resources: '/api/exports/contacttocsv/:part',
+      permissions: ['get', 'post']
+    },
+    {
       resources: '/api/exports/contacttocsv',
       permissions: ['get', 'post']
     }]

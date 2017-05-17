@@ -13,7 +13,7 @@ var storage = multer.diskStorage({
     },
     
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now());
+        cb(null, file.fieldname + '-' + Date.now());  
   }});
 var file = multer({ storage: storage }).single('docRender');
 
@@ -27,9 +27,12 @@ module.exports = function (app) {
      app.route('/api/exports/renderDoc/:id').all(articlesPolicy.isAllowed).all(file)
      .post(exports.templateRender);
      
-     app.route('/api/exports/contacttocsv').all(articlesPolicy.isAllowed)
+     app.route('/api/exports/contacttocsv/:part').all(articlesPolicy.isAllowed)
      .get(exports.exportContactsToCSV)
+     
+    app.route('/api/exports/contacttocsv').all(articlesPolicy.isAllowed)
      .post(exports.exportContactsToCSVCustom);
+
      
      app.route('/api/exports/emailslist').all(articlesPolicy.isAllowed)
      .get(exports.list)

@@ -7,17 +7,17 @@ angular.module('exports').controller('ExportsController', ['$scope', '$statePara
   $scope.smartList = [];
   $scope.cats = [];
   
-    $scope.csv = function(note){
+    $scope.csv = function(part){
       $scope.spinner = true;
-      $http.get('/api/exports/contacttocsv').
+      $http.get('/api/exports/contacttocsv/' + part).
         then(function(response) {
           $scope.spinner = false;
-          console.log(response);
           var blob = new Blob([response.data], { type: "application/CSV"});
-          var fileName = "test.csv";
+          var fileName = "Contacts-Part-" + part + ".csv";
           saveAs(blob, fileName);
         }, function(response) {
-
+          $scope.spinner = false;
+          toastr.warning("Error exporting CSV");
         }
         );  
     };

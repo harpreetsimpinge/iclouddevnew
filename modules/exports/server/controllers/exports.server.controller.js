@@ -148,7 +148,6 @@ exports.templateRender = function (req, res) {
         if(article[k].hasOwnProperty("id")){
           if(article[k].id.type === "date"){
             article[k].value  = moment(article[k].value).format('MM/DD/YYYY');
-            console.log(article[k].value);
           }
         }
       }
@@ -299,7 +298,7 @@ exports.templateRender = function (req, res) {
 };
 
 exports.exportContactsToCSV = function (req, res) { 
-
+  console.log("export csv");
   var json2csv = require('json2csv');
 
   var titles = [
@@ -316,129 +315,137 @@ exports.exportContactsToCSV = function (req, res) {
     query.populate(populate);
   }
   
-  query.lean()
-  .skip(2)
-  //.limit(100)
-  .exec(function (err, article) {
-    if (err) {
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } else {
-      //res.json(articles);
- 
-      for(var k in article){
-        var full_name = article[k].FirstnameContact.value + " " +  article[k].LastnameContact.value;
-        var set = {
-        "Full_name" : full_name, 
-        "First_name":article[k].FirstnameContact.value,
-        "Last_name" : article[k].LastnameContact.value ,
-        "Title" : article[k].JobTitleContact.value , 
-        //"Company": article[k].CompanyContact.value,
-        "Email" : article[k].EmailContact.value ,
-        "Address" : article[k].AddressContact.value,
-        "City" : article[k].CityContact.value ,
-        "State" : article[k].StateContact.value ,
-        "Zip" : article[k].ZipContact.value ,
-        "Phone" : article[k].PhoneContact.value ,
-        "Cell" : article[k].CellContact.value , 
-        "Claim_" : article[k].ClaimContact.value ,
-        "SS_" : article[k].SSContact.value ,
-        "DOB" : article[k].DOBContact.value , 
-        "DOI" : article[k].DOIContact.value , 
-        "Injury" : article[k].InjuryContact.value, 
-        "Job_Title" :  article[k].JobTitleContact.value ,
-        //"Company_Name2" : article[k].CompanyContact.value ,
-        "Contact_First_Name" : article[k].LastnameContact.value ,
-        "Contact_Last_Name" : article[k].ContactLastNameEmployer.value , 
-        "Gender_M_or_F" : article[k].GenderMorFEmployer.value ,
-        "Phone1" : article[k].ContactFirstNameEmployer.value , 
-        "fax1" : article[k].faxEmployer.value ,
-        "e-mail" : article[k].emailEmployer.value ,
-        "Address1" : article[k].AddressEmployer.value , 
-        "City1" : article[k].CityEmployer.value , 
-        "State1" : article[k].StateEmployer.value
-        , "Zip1" : article[k].ZipEmployer.value ,
-        "Company_Name1" : article[k].CompanyNameClaimsRepresentative.value ,
-        "First_Name1" : article[k].FirstNameClaimsRepresentative.value , 
-        "Last_Name1" : article[k].LastNameClaimsRepresentative.value ,
-        "Gender_M_or_F1" : article[k].GenderMorFClaimsRepresentative.value ,
-        "Phone2" : article[k].PhoneClaimsRepresentative.value , 
-        "Fax2" : article[k].FaxClaimsRepresentative.value , 
-        "e-mail1" : article[k].emailClaimsRepresentative.value , 
-        "Claims_Assistant" : article[k].ClaimsAssistantClaimsRepresentative.value , 
-        "Claims_Assistant_email" : article[k].ClaimsAssistantemailClaimsRepresentative.value ,
-        "Address2" : article[k].AddressClaimsRepresentative.value , 
-        "City2" : article[k].CityClaimsRepresentative.value , 
-        "State2" : article[k].StateClaimsRepresentative.value , 
-        "Zip2" : article[k].ZipClaimsRepresentative.value , 
-        "First_Name2" : article[k].FirstNameClaimsRepresentative.value ,
-        "Last_name2" : article[k].LastNameClaimsRepresentative.value , 
-        "Dr_Type" : article[k].DrTypeTreatingPhysician.value , 
-        "Firm" : article[k].FirmTreatingPhysician.value , 
-        "Street_address" : article[k].StreetaddressTreatingPhysician.value , 
-        "City3" : article[k].CityTreatingPhysician.value , 
-        "State3" : article[k].StateTreatingPhysician.value , 
-        "Zip3" : article[k].ZipTreatingPhysician.value ,
-        "Phone3" : article[k].PhoneTreatingPhysician.value , 
-        "Fax3" : article[k].FaxTreatingPhysician.value ,
-        "Medical_Record_" : article[k].MedicalRecordTreatingPhysician.value , 
-        "First_Name3" : article[k].FirstNameTreatingPhysician.value , 
-        "Last_Name3" : article[k].LastnameTreatingPhysician.value , 
-        "Gender_M_or_F2" : article[k].GenderMorFApplicantAtttorney.value , 
-        "Firm1" : article[k].FirmApplicantAtttorney.value ,
-        "Address3" : article[k].AddressApplicantAtttorney.value , 
-        "City4" : article[k].CityApplicantAtttorney.value , 
-        "State4" : article[k].StateApplicantAtttorney.value , 
-        "Zip4" : article[k].ZipApplicantAtttorney.value ,
-        "Phone4" : article[k].PhoneApplicantAtttorney.value , 
-        "Fax4" : article[k].FaxApplicantAtttorney.value , 
-        "e-mail2" : article[k].emailApplicantAtttorney.value , 
-        "First_Name4" : article[k].FirstNameApplicantAtttorney.value , 
-        "Last_Name4" : article[k].LastNameApplicantAtttorney.value , 
-        "Gender_M_or_F3" : article[k].GenderDefenseAttorney.value , 
-        "Firm2" : article[k].FirmDefenseAttorney.value , 
-        "Street_address1" : article[k].StreetaddressDefenseAttorney.value , 
-        "City5" : article[k].CityDefenseAttorney.value , 
-        "State5" : article[k].StateDefenseAttorney.value , 
-        "Zip5" : article[k].ZipDefenseAttorney.value , 
-        "Phone5" : article[k].PhoneDefenseAttorney.value , 
-        "Fax5" : article[k].FaxDefenseAttorney.value , 
-        "e-mail3" : article[k].emailDefenseAttorney.value , 
-        "Service_Requested" : article[k].ServiceRequestedServiceRequested.value ,
-        "Additional_Service_Request" : article[k].LastnameContact.value , 
-        "Program" : article[k].AdditionalServiceRequestServiceRequested.value ,
-        "Date_of_referral" : article[k].DateofreferralFocusInformation.value , 
-        //"Date_assigned" : article[k].CounselorAssignedFocusInformation.value ,
-        "Date_of_Reopen" : article[k].DateofReopenFocusInformation.value , 
-        "Re-open_Service_Request" : article[k].LastnameContact.value , 
-        "Additional_Information" : article[k].LastnameContact.value , 
-        "Date_Cancelled" : article[k].LastnameContact.value ,
-        "Reason_for_cancellation" : article[k].ReasonforcancellationFocusInformation.value ,
-        "North_or_Central_or_Statewide" : article[k].NorthorCentralorStatewideFocusInformation.value ,
-        //"Counselor_Assigned" : article[k].CounselorAssignedFocusInformation.value ,
-        "Date_Closed" : article[k].DateClosedFocusInformation.value ,
-        "Estimated_case_value" : article[k].EstimatedcasevalueFocusInformation.value , 
-        "test 1" : article[k].LastnameContact.value 
-        , "Contact_ID" : article[k].LastnameContact.value 
-        , "Language" : article[k].LastnameContact.value ,
-        "Adding_date" : article[k].LastnameContact.value , 
-        "Adding_application" : article[k].LastnameContact.value , 
-        "Adding_method" : article[k].LastnameContact.value , 
-        "Added_by" : article[k].LastnameContact.value , 
-        "Login_name" : article[k].LastnameContact.value
-      };
-        entries.push(set);
-      }
-      json2csv({ data: entries, fields: titles }, function(err, csv) {
-        if (err) console.log(err);
-        res.send(csv).end();
-        var rand = randomstring.generate(3);
-      });
-    }
-    
-  });
+  if(req.params.limit){
+    query.limit(req.params.limit);
+  }
+  
+  Article.count(function(err, count){
+    console.log("total: ", count);
+    console.log("skip: ", (count / 5) * (req.params.part - 1));
+    console.log("limit:", (count / 5));
+    query.lean().sort('LastnameContact.value').skip((count / 5) * (req.params.part - 1)).limit((count / 5))
+    .exec(function (err, article) {
+      console.log(err);
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } else {
+        //res.json(articles);
 
+        for(var k in article){
+          var full_name = article[k].FirstnameContact.value + " " +  article[k].LastnameContact.value;
+          var set = {
+          "Full_name" : full_name, 
+          "First_name":article[k].FirstnameContact.value,
+          "Last_name" : article[k].LastnameContact.value ,
+          "Title" : article[k].JobTitleContact.value , 
+          //"Company": article[k].CompanyContact.value,
+          "Email" : article[k].EmailContact.value ,
+          "Address" : article[k].AddressContact.value,
+          "City" : article[k].CityContact.value ,
+          "State" : article[k].StateContact.value ,
+          "Zip" : article[k].ZipContact.value ,
+          "Phone" : article[k].PhoneContact.value ,
+          "Cell" : article[k].CellContact.value , 
+          "Claim_" : article[k].ClaimContact.value ,
+          "SS_" : article[k].SSContact.value ,
+          "DOB" : article[k].DOBContact.value , 
+          "DOI" : article[k].DOIContact.value , 
+          "Injury" : article[k].InjuryContact.value, 
+          "Job_Title" :  article[k].JobTitleContact.value ,
+          //"Company_Name2" : article[k].CompanyContact.value ,
+          "Contact_First_Name" : article[k].LastnameContact.value ,
+          "Contact_Last_Name" : article[k].ContactLastNameEmployer.value , 
+          "Gender_M_or_F" : article[k].GenderMorFEmployer.value ,
+          "Phone1" : article[k].ContactFirstNameEmployer.value , 
+          "fax1" : article[k].faxEmployer.value ,
+          "e-mail" : article[k].emailEmployer.value ,
+          "Address1" : article[k].AddressEmployer.value , 
+          "City1" : article[k].CityEmployer.value , 
+          "State1" : article[k].StateEmployer.value
+          , "Zip1" : article[k].ZipEmployer.value ,
+          "Company_Name1" : article[k].CompanyNameClaimsRepresentative.value ,
+          "First_Name1" : article[k].FirstNameClaimsRepresentative.value , 
+          "Last_Name1" : article[k].LastNameClaimsRepresentative.value ,
+          "Gender_M_or_F1" : article[k].GenderMorFClaimsRepresentative.value ,
+          "Phone2" : article[k].PhoneClaimsRepresentative.value , 
+          "Fax2" : article[k].FaxClaimsRepresentative.value , 
+          "e-mail1" : article[k].emailClaimsRepresentative.value , 
+          "Claims_Assistant" : article[k].ClaimsAssistantClaimsRepresentative.value , 
+          "Claims_Assistant_email" : article[k].ClaimsAssistantemailClaimsRepresentative.value ,
+          "Address2" : article[k].AddressClaimsRepresentative.value , 
+          "City2" : article[k].CityClaimsRepresentative.value , 
+          "State2" : article[k].StateClaimsRepresentative.value , 
+          "Zip2" : article[k].ZipClaimsRepresentative.value , 
+          "First_Name2" : article[k].FirstNameClaimsRepresentative.value ,
+          "Last_name2" : article[k].LastNameClaimsRepresentative.value , 
+          "Dr_Type" : article[k].DrTypeTreatingPhysician.value , 
+          "Firm" : article[k].FirmTreatingPhysician.value , 
+          "Street_address" : article[k].StreetaddressTreatingPhysician.value , 
+          "City3" : article[k].CityTreatingPhysician.value , 
+          "State3" : article[k].StateTreatingPhysician.value , 
+          "Zip3" : article[k].ZipTreatingPhysician.value ,
+          "Phone3" : article[k].PhoneTreatingPhysician.value , 
+          "Fax3" : article[k].FaxTreatingPhysician.value ,
+          "Medical_Record_" : article[k].MedicalRecordTreatingPhysician.value , 
+          "First_Name3" : article[k].FirstNameTreatingPhysician.value , 
+          "Last_Name3" : article[k].LastnameTreatingPhysician.value , 
+          "Gender_M_or_F2" : article[k].GenderMorFApplicantAtttorney.value , 
+          "Firm1" : article[k].FirmApplicantAtttorney.value ,
+          "Address3" : article[k].AddressApplicantAtttorney.value , 
+          "City4" : article[k].CityApplicantAtttorney.value , 
+          "State4" : article[k].StateApplicantAtttorney.value , 
+          "Zip4" : article[k].ZipApplicantAtttorney.value ,
+          "Phone4" : article[k].PhoneApplicantAtttorney.value , 
+          "Fax4" : article[k].FaxApplicantAtttorney.value , 
+          "e-mail2" : article[k].emailApplicantAtttorney.value , 
+          "First_Name4" : article[k].FirstNameApplicantAtttorney.value , 
+          "Last_Name4" : article[k].LastNameApplicantAtttorney.value , 
+          "Gender_M_or_F3" : article[k].GenderDefenseAttorney.value , 
+          "Firm2" : article[k].FirmDefenseAttorney.value , 
+          "Street_address1" : article[k].StreetaddressDefenseAttorney.value , 
+          "City5" : article[k].CityDefenseAttorney.value , 
+          "State5" : article[k].StateDefenseAttorney.value , 
+          "Zip5" : article[k].ZipDefenseAttorney.value , 
+          "Phone5" : article[k].PhoneDefenseAttorney.value , 
+          "Fax5" : article[k].FaxDefenseAttorney.value , 
+          "e-mail3" : article[k].emailDefenseAttorney.value , 
+          "Service_Requested" : article[k].ServiceRequestedServiceRequested.value ,
+          "Additional_Service_Request" : article[k].LastnameContact.value , 
+          "Program" : article[k].AdditionalServiceRequestServiceRequested.value ,
+          "Date_of_referral" : article[k].DateofreferralFocusInformation.value , 
+          //"Date_assigned" : article[k].CounselorAssignedFocusInformation.value ,
+          "Date_of_Reopen" : article[k].DateofReopenFocusInformation.value , 
+          "Re-open_Service_Request" : article[k].LastnameContact.value , 
+          "Additional_Information" : article[k].LastnameContact.value , 
+          "Date_Cancelled" : article[k].LastnameContact.value ,
+          "Reason_for_cancellation" : article[k].ReasonforcancellationFocusInformation.value ,
+          "North_or_Central_or_Statewide" : article[k].NorthorCentralorStatewideFocusInformation.value ,
+          //"Counselor_Assigned" : article[k].CounselorAssignedFocusInformation.value ,
+          "Date_Closed" : article[k].DateClosedFocusInformation.value ,
+          "Estimated_case_value" : article[k].EstimatedcasevalueFocusInformation.value , 
+          "test 1" : article[k].LastnameContact.value 
+          , "Contact_ID" : article[k].LastnameContact.value 
+          , "Language" : article[k].LastnameContact.value ,
+          "Adding_date" : article[k].LastnameContact.value , 
+          "Adding_application" : article[k].LastnameContact.value , 
+          "Adding_method" : article[k].LastnameContact.value , 
+          "Added_by" : article[k].LastnameContact.value , 
+          "Login_name" : article[k].LastnameContact.value
+        };
+        if(article[k].StatusFocusInformation)
+          set.Status = article[k].StatusFocusInformation.value;
+          entries.push(set);
+        }
+        json2csv({ data: entries, fields: titles }, function(err, csv) {
+          if (err) console.log(err);
+          res.send(csv).end();
+          var rand = randomstring.generate(3);
+        });
+      }
+    });
+  })
 
   //res.json("ok");
   
@@ -449,7 +456,7 @@ exports.CalculatorToCSV = function (req, res) {
   var json2csv = require('json2csv');
 
   var titles = [
-       "Full Name", "Claim","Date Assigned","Date Close", "RTW (trans)","TWA End", "RTW (reg/perm)", "TD Daily rate", "Days Saved", "Voucher", "Savings to Date"	
+       "Full Name", "Claim","Date Assigned","Date Close", "RTW (trans)","TWA End", "RTW (reg/perm)", "TD Daily rate", "Days Saved", "Voucher", "Savings to Date", "Status"	
   ];
   
   var entries = [];
@@ -464,7 +471,8 @@ exports.CalculatorToCSV = function (req, res) {
       var value = smartList[k].text;
       if(smartList[k].endingDate)
         var end = new Date(smartList[k].endingDate);
-      console.log("end: " + end);
+      console.log("end: " + field);
+      
       if(field === "closed"){
         if(value === "open"){
           query.where('DateClosedFocusInformation.value').lte(new Date(1970, 1, 2));
@@ -473,11 +481,10 @@ exports.CalculatorToCSV = function (req, res) {
         else if(value === "closed"){
           query.where('DateClosedFocusInformation.value').lte(new Date());
         }
-        continue;
       }
       
       var re = new RegExp(value, 'i');
-      if(smartList[k].type === "text"){
+      if(smartList[k].type === "text" || smartList[k].type === "dropdown"){
         if(smartList[k].option === "contains")
           query.where(field+'.value').equals(new RegExp(value,'i'));
         else if(smartList[k].option === "starting")
@@ -537,7 +544,7 @@ exports.CalculatorToCSV = function (req, res) {
   }
   
   query.lean()
-  .skip(2)
+  //.skip(2)
   //.limit(100)
   .exec(function (err, article) {
     console.log("#### we found : " + article.length );
@@ -550,7 +557,7 @@ exports.CalculatorToCSV = function (req, res) {
  
       for(var k in article){
         var rate = 0;
-        var rtwT = null, twaEND = null, dateassign = null, dailyRate = null, regperm = null, date2 = null, date1 = null, closeDate = null;
+        var rtwT = null, twaEND = null, dateassign = null, dailyRate = null, regperm = null, date2 = null, date1 = null, closeDate = null, status = null; 
         if(
             (article[k].RTWtransFocusInformation && article[k].TDDailyrateFocusInformation)  &&
             (article[k].RTWtransFocusInformation.value !== null && article[k].TDDailyrateFocusInformation.value !== null)
@@ -567,7 +574,6 @@ exports.CalculatorToCSV = function (req, res) {
               date1 = moment().subtract(1, 'months').endOf('month')._d;
               
             }
-            console.log("ending date: " + date1);
             date2 = article[k].RTWtransFocusInformation.value;
             var timeDiff = Math.abs(date2.getTime() - date1.getTime());
             var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
@@ -575,7 +581,6 @@ exports.CalculatorToCSV = function (req, res) {
             rtwT = moment(article[k].RTWtransFocusInformation.value).format('MM/DD/YYYY');
             twaEND =  moment(date1).format('MM/DD/YYYY');
             dailyRate = article[k].TDDailyrateFocusInformation.value;
-            console.log("RTW trans: " + rtwT);
         }
         if(article[k].DateassignedFocusInformation){
           dateassign = moment(article[k].DateassignedFocusInformation.value).format('MM/DD/YYYY');
@@ -588,6 +593,10 @@ exports.CalculatorToCSV = function (req, res) {
 
         var voucher = 0;
         var full_name = article[k].FirstnameContact.value + " " +  article[k].LastnameContact.value;
+        if(article[k].StatusFocusInformation)
+          status = article[k].StatusFocusInformation.value;
+        else
+          status = "";
         if(article[k].RTWregpermFocusInformation && article[k].RTWregpermFocusInformation.value !== null){
           rate +=6000;
           voucher = 6000;
@@ -606,11 +615,10 @@ exports.CalculatorToCSV = function (req, res) {
         "TD Daily rate" : dailyRate,
         "Days Saved" : diffDays,
         "Voucher" : "$"+voucher,
-        "Savings to Date" : "$"+rate
-        
+        "Savings to Date" : "$"+rate,
+        "Status": status
       };
         entries.push(set);
-        console.log(set);
       }
       json2csv({ data: entries, fields: titles }, function(err, csv) {
         if (err) console.log(err);
@@ -625,7 +633,6 @@ exports.CalculatorToCSV = function (req, res) {
   //res.json("ok");
   
 };
-
 
 exports.list = function (req, res) {
   var query = EmailHistory.find();
@@ -680,7 +687,6 @@ exports.findDoplicates = function (req, res) {
   });
         
   };
-
 
 function documentEmail(em){
     var email = new EmailHistory(em);
@@ -789,7 +795,7 @@ exports.exportContactsToCSVCustom = function (req, res) {
       query.or([{ permissions: req.user._id }, { user: req.user._id }]);
     }
     
-    query.sort('-created')
+    query.sort('LastnameContact.value')
          .lean()
          //.limit(1000)
          .exec(function (err, article) {
@@ -898,9 +904,12 @@ exports.exportContactsToCSVCustom = function (req, res) {
         "Adding_application" : article[k].LastnameContact.value , 
         "Adding_method" : article[k].LastnameContact.value , 
         "Added_by" : article[k].LastnameContact.value , 
-        "Login_name" : article[k].LastnameContact.value
+        "Login_name" : article[k].LastnameContact.value,
+        
       };
-        entries.push(set);
+      if(article[k].StatusFocusInformation)
+        set.Status = article[k].StatusFocusInformation.value; 
+       entries.push(set);
       }
       json2csv({ data: entries, fields: titles }, function(err, csv) {
         if (err) console.log(err);

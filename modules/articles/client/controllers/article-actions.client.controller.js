@@ -51,7 +51,7 @@ angular.module('articles').controller('articleActionController', ['$scope', '$lo
     //   }
     // }
     // console.log('users', $scope.users);
-
+    //
     $scope.froalaOptions = {
       toolbarButtons: ["bold","italic","underline","strikeThrough","fontSize","fontFamily","color",
         "|","formatBlock","blockStyle","align","insertOrderedList","insertUnorderedList","outdent","indent",
@@ -398,6 +398,7 @@ angular.module('articles').controller('articleActionController', ['$scope', '$lo
       }*/
       var article = $scope.article;
       article.permissions = $scope.permissions;
+      article.
       console.log("per:   ", $scope.permissions);
       article.$update(function() {
         $location.path('articles/' + article._id);

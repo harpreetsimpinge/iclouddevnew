@@ -54,7 +54,6 @@ angular.module('articles').controller('articleController', ['$scope', '$state', 
     $scope.getFields = function() {
       $http.get('/api/fields/all-fields').
       then(function(response) {
-          //console.log(response.data);
           $scope.fields = response.data;
           $rootScope.fields = response.data;
           $scope.requiredFileds = [];

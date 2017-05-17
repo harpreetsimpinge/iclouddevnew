@@ -289,7 +289,7 @@
                   <div class="list-group-item row note-table-header">
                     <div class="col-md-12">
                       <div class="col-md-1">
-                        Edit
+                        Edit 
                       </div>
                       <div class="col-md-2">
                         <a href="#" ng-click="flipSortReverse(); searchAndDisplay();">
@@ -414,6 +414,10 @@
                     <h4>Assign Followup</h4>
                     <select ng-options="item._id as item.displayName for item in users" ng-model="newNote.assign" class="form-control"></select>
                   </div>
+                  <div class="col-md-3">
+                    <h4>Status</h4>
+                    <select ng-options="item for item in article.StatusFocusInformation.id.values" ng-model="article.StatusFocusInformation.value" class="form-control" ng-change="sendEditArticle(true)"></select>
+                  </div>
                   <div class="col-md-3 form-group">
                     <h4>Note Type</h4>
                     <select ng-model="newNote.type" class="form-control">
@@ -433,7 +437,24 @@
                       <option value="invoice" class="invoiceNote">Invoice</option>
                     </select>
                   </div>
-                  <div class="col-md3 form-group" nv-file-over="" uploader="uploader" ng-mouseover="changeUploadType('newFileNote',{})">
+                  
+                  <div class="col-md-3 form-group">
+                    <h4>Note Date</h4>
+                    <mdp-date-picker class="form-control" mdp-placeholder="" ng-model="newNote.date"></mdp-date-picker>
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <h4>Follow Up Date</h4>
+                    <mdp-date-picker class="form-control" ng-model="newNote.followup"></mdp-date-picker>
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <h4>RTW (reg/perm)</h4>
+                    <mdp-date-picker class="form-control" ng-model="article.RTWregpermFocusInformation.value"></mdp-date-picker>
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <h4>RTW (trans)</h4>
+                    <mdp-date-picker class="form-control" ng-model="article.RTWtransFocusInformation.value"></mdp-date-picker>
+                  </div>
+                  <div class="col-md-3 form-group" nv-file-over="" uploader="uploader" ng-mouseover="changeUploadType('newFileNote',{})">
                     <h4>Attachments</h4>
                     <form>
                       <fieldset style='position: relative'>
@@ -459,22 +480,6 @@
                         </ul>
                       </fieldset>
                     </form>
-                  </div>
-                  <div class="col-md-3 form-group">
-                    <h4>Note Date</h4>
-                    <mdp-date-picker class="form-control" mdp-placeholder="" ng-model="newNote.date"></mdp-date-picker>
-                  </div>
-                  <div class="col-md-3 form-group">
-                    <h4>Follow Up Date</h4>
-                    <mdp-date-picker class="form-control" ng-model="newNote.followup"></mdp-date-picker>
-                  </div>
-                  <div class="col-md-3 form-group">
-                    <h4>RTW (reg/perm)</h4>
-                    <mdp-date-picker class="form-control" ng-model="article.RTWregpermFocusInformation.value"></mdp-date-picker>
-                  </div>
-                  <div class="col-md-3 form-group">
-                    <h4>RTW (trans)</h4>
-                    <mdp-date-picker class="form-control" ng-model="article.RTWtransFocusInformation.value"></mdp-date-picker>
                   </div>
                   <div class="col-md-12 input-height">
                     <h4>Description</h4>

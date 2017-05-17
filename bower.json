@@ -5,7 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "bootstrap": "~3.3.6",
-    "angular": "~1.6",
+    "angular": "~1.5.x",
     "angular-resource": "~1.3",
     "angular-animate": "1.4.9",
     "angular-mocks": "~1.3",
@@ -20,7 +20,7 @@
     "ng-dialog": "~0.5.6",
     "angular-ui-calendar": "1.0.1",
     "moment": "~2.11.2",
-    "angular-material": "~1.0.1",
+    "angular-material": "~1.0.9",
     "bootstrap-toggle": "~2.2.1",
     "switchery": "~0.8.1",
     "angular-flash-alert": "~1.1.1",
@@ -30,7 +30,7 @@
     "angular-daterangepicker": "~0.2.2",
     "angular-smart-table": "~2.1.6",
     "angular-filter": "~0.5.8",
-    "mdPickers": "~0.5.0",
+    "mdPickers": "~0.7.5",
     "angular-drag-and-drop-lists": "~1.3.0",
     "angular-spinner": "~0.8.0",
     "html2canvas": "~0.4.1",
@@ -46,10 +46,11 @@
     "ngWYSIWYG": "~0.6.2",
     "jszip-utils": "~0.0.2",
     "docxtemplater": "~2.0.0",
-    "docxtemplater-pykiss": "~1.0.6"
+    "docxtemplater-pykiss": "~1.0.6",
+    "froala-wysiwyg-editor": "~2.1.0"
   },
   "resolutions": {
-    "angular": "1.6.1",
+    "angular": "~1.5.x",
     "angular-messages": "1.4.9",
     "angular-animate": "1.4.9",
     "bootstrap-daterangepicker": "^2.0.0",
