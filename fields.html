@@ -1,0 +1,37 @@
+<script>
+  
+var list = ["First name","Last name","Title","Company","Email"," Address","City","State","Zip","Phone","Cell ","Claim ","SS ","DOB","DOI","Injury","Job Title","Employer-Company Name","Employer-Contact First Name","Employer-Contact Last Name","Employer-Gender M or F","Employer-Phone","Employer-fax","Employer-email","Employer-Address","Employer-City","Employer-State","Employer-Zip","Claims Representative-Company Name","Claims Representative-First Name","Claims Representative-Last Name","Claims Representative-Gender M or F","Claims Representative-Phone","Claims Representative-Fax","Claims Representative-email","Claims Representative-Claims Assistant","Claims Representative-Claims Assistant email","Claims Representative-Address","Claims Representative-City","Claims Representative-State","Claims Representative-Zip","Treating Physician-First Name","Treating Physician-Last name","Treating Physician-Dr. Type","Treating Physician-Firm","Treating Physician-Street address","Treating Physician-City","Treating Physician-State","Treating Physician-Zip","Treating Physician-Phone","Treating Physician-Fax","Treating Physician-Medical Record ","Applicant Atttorney-First Name","Applicant Atttorney-Last Name","Applicant Atttorney-Gender M or F","Applicant Atttorney-Firm","Applicant Atttorney-Address","Applicant Atttorney-City","Applicant Atttorney-State","Applicant Atttorney-Zip","Applicant Atttorney-Phone","Applicant Atttorney-Fax","Applicant Atttorney-email","Defense Attorney-First Name","Defense Attorney-Last Name","Defense Attorney-Gender-M or F","Defense Attorney-Firm","Defense Attorney-Street address","Defense Attorney-City","Defense Attorney-State","Defense Attorney-Zip","Defense Attorney-Phone","Defense Attorney-Fax","Defense Attorney-email","Service Requested-Service Requested","Service Requested-Additional Service Request","Focus Information-Program","Focus Information-Date of referral","Focus Information-Date assigned","Focus Information-Date of Reopen","Focus Information-Reopen Service Request","Focus Information-Additional Information","Focus Information-Date Cancelled","Focus Information-Reason for cancellation","Focus Information-North or Central or Statewide","Focus Information-Counselor Assigned","Focus Information-Date Closed","Focus Information-Estimated case value","test 1","System-Contact ID","System-Language","System-Adding date","System-Adding application","System-Adding method","System-Added by","System-Login name","System-Folder","System-Contact type"];
+  for(var i in list){
+  var required = false;
+  var res = list[i].split("-");
+  var i = 1;
+  var old = "";
+  var category = "";
+  var key;
+  if(res.length > 1){
+    //console.log(res);
+    var category = res[0];
+    var key1 = res[1].replace(/\s/g, '');
+    var key2 = res[0].replace(/\s/g, '');
+     key = key1+key2;
+    var name = res[1];
+    var category = res[0];
+  }
+  else{
+    key = res[0]+"Contact";
+    name = res[0];
+    required = true;
+    category  = "Contact";
+  }
+  console.log(old);
+  if(category !== old){
+    old = category;
+    i = 0;
+  }
+  document.write('{ name : "'+name+'", type : "text",  key : "'+key+'", category:"'+category+'", required:'+required+', order: '+i+'}<br>');
+  i++;
+  //  document.write(''+list1[i]+' {<br>    &nbsp&nbsptype: '+type+', <br> &nbsp&nbspdefault: \'\'<br>  },<br>');
+
+
+} 
+ </script>

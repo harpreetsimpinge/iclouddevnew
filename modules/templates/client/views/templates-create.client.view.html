@@ -1,0 +1,39 @@
+<section ng-controller="templatesCreateController">
+  <h1>Create Template</h1>
+  <div class="row templates">
+    <div class="col-md-3 side">
+      <div class="col-md-12 side-header">Information</div>
+      <div class="info" ng-repeat="cat in cats">
+        <h3>{{cat}}</h3>
+            <button class="form-control btn btn-info" ng-model="copypaste" ngclipboard data-clipboard-text="**{{copypaste.key}}**">Copy</button>
+            <select ng-model="copypaste" ng-options="item as item.name group by item.category for item in fields | filter:{category: cat} | orderBy:'order'" class="form-control"  data-clipboard-text="**{{copypaste.key}}**"></select>
+      </div>
+      <!--<ul class='info'>
+        <li ng-repeat="item in fields| orderBy: 'category'">
+          <h3 ng-show='fields[$index-1].category === item.category || $index === 0'>{{item.category}}</h3>
+          <span ng-show='fields[$index-1].category !== item.category && $index !== 0' class="btn no-padding" data-clipboard-text="**{{item.key}}**">
+            {{item.name}}
+          </span>
+        </span>
+      </ul>-->
+    </div>
+    <div class="col-md-9">
+      <div class="col-md-12 title">
+        <div class="col-md-8">
+          <label>Title</label>
+          <input type="text" class="form-control" ng-model="doc.title">
+        </div>
+        <div class="col-md-offset-1 col-md-2" style="margin-top:23px;">
+          <button type="button" class="btn btn-success" ng-click="createDoc()" ng-show="doc._id === undefined">Save</button>
+          <button type="button" class="btn btn-success" ng-click="updateDoc()" ng-show="doc._id !== undefined">Update</button>
+        </div>
+        <div class="col-md-1" style="margin-top:23px;">
+          <button type="button" class="btn btn-danger" ng-click="deleteDoc()" ng-disabled="doc._id === undefined">Delete</button>
+        </div>
+      </div>
+      <div class="col-md-12 input margin40top">
+        <div text-angular ng-model="doc.text"></div>
+      </div>
+    </div>
+  </div>
+</section>

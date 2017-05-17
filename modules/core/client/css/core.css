@@ -1,0 +1,105 @@
+.content {
+    margin-top: 50px;
+    background-image: url('https://s3-us-west-1.amazonaws.com/production-foi/images-for-emails/background.jpg');
+    background-size: cover;
+    height: 100%;
+}
+.undecorated-link:hover {
+  text-decoration: none;
+}
+[ng\:cloak],
+[ng-cloak],
+[x-ng-cloak],
+.ng-cloak,
+.x-ng-cloak {
+  display: none !important;
+}
+.header-profile-image {
+  opacity: 0.8;
+  height: 28px;
+  width: 28px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+.open .header-profile-image,
+a:hover .header-profile-image {
+  opacity: 1;
+}
+.user-header-dropdown-toggle {
+  padding-top: 11px !important;
+  padding-bottom: 11px !important;
+}
+.error-text {
+  display: none;
+}
+.has-error .help-block.error-text {
+  display: block;
+}
+.has-error .help-inline.error-text {
+  display: inline;
+}
+
+.fullScreen{
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    background: rgba(179, 179, 179, 0.68);
+    top:0px;
+    left: 0px;
+}
+.loader .fa-spinner{
+    font-size: 84px;
+}
+
+.saved .fa-check{
+    font-size: 84px;
+}
+
+.err .fa-pulse{
+    font-size: 84px;
+}
+
+.fullScreen .content{
+    margin: 183px auto;
+    width: 392px;
+    height: 265px;
+    top: 300px;
+    font-size: 84px;
+    color: #277D27;
+    background: rgba(136, 156, 172, 0.42);
+    text-align: center;
+    border-radius: 6px;
+    border: 1px solid;
+}
+
+.err .content{
+    color: #F0514E;
+}
+
+.saved .content{
+    color: #4343CA;
+}
+
+.loader .content{
+    
+}
+
+.mainBlock{
+    height: 300px;
+    margin-top: 100px;
+}
+
+.logo{
+    width: auto;
+    height: 33px;
+    display: initial;
+
+}
+
+.white-bg-op{
+    background: rgba(255, 255, 255, 0.52);
+}
+
+h1{
+    color: #fff;
+}

@@ -1,0 +1,162 @@
+.ngdialog.ngdialog-theme-default .ngdialog-content {  
+    width: 1000px;
+}
+.phoneNote{
+    background: rgba(58,135,173,.7);
+}
+
+.emailNote{
+    background: rgba(230, 144, 144, 0.7);
+}
+
+.followupNote{
+    background: rgba(185, 80, 80, 0.7);
+}
+
+.meetingNote{
+    background: rgba(214, 199, 127, 0.7);;
+}
+
+.otherNote{
+    background: rgba(126, 222, 147, 0.7);
+}
+
+.checkingNote{
+    background: rgba(197,70,176,0.7)
+}
+
+.priorityNote{
+    background: red;
+    color: #fff;
+}
+
+.closingNote{
+    background: #DDA0A0;
+}
+
+.employerNote{
+    background: #6FC071;
+}
+
+.fa-male{
+    width: 38px;
+}
+
+.formNote{
+    background: #996FC0;
+}
+
+.physicianNote{
+    background: #A0D2DD;
+}
+
+.bottom {
+	border-bottom: 1px solid #ccc;
+}
+
+.fc-event.fc-draggable {
+    border: none;
+}
+
+.todayNotesHeader{
+    background: rgba(128, 128, 128, 0.52);
+    border-bottom: 2px solid;
+}
+
+.todayNoteList md-list-item{
+    padding-top: 15px;
+}
+
+.shadow{
+    -webkit-box-shadow: 7px 13px 20px 0px rgba(153,153,153,0.7);
+    -moz-box-shadow: 7px 13px 20px 0px rgba(153,153,153,0.7);
+    box-shadow: 7px 13px 20px 0px rgba(153,153,153,0.7);
+}
+
+.margin20top{
+    margin-top: 20px;
+}
+
+.margin40top{
+    margin-top: 40px;
+}
+
+.margin20-buttom{
+    margin-bottom: 20px;
+}
+
+.padding10top{
+    padding-top: 10px;
+}
+
+.height55{
+    min-height: 55px;
+}
+
+.fc-time{
+    display: none;
+}
+
+.red{
+    color: red;
+}
+
+.blue{
+    color: blue;
+}
+
+.green{
+    color: green;
+}
+
+.gray{
+    color: gray;
+}
+
+.black{
+    color: black;
+}
+
+.greyb{
+    color: #8496BA;
+}
+
+.assignNote{
+    background: #2196F3;
+}
+
+.priorityNote{
+    background: #ff9800;
+}
+
+
+@media (min-width: 992px) {
+    .panel-medium-size {
+        width: 80%;
+        margin-left: 18%;
+    }
+
+    .dialog-medium-size .ngdialog-content {
+        width: 80%;
+        margin-left: 18%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .panel-medium-size {
+        width: 80%;
+        margin-left: 15%;
+    }
+
+    .dialog-medium-size .ngdialog-content {
+        width: 80%;
+        margin-left: 15%;
+    }
+}
+
+@media (min-width: 1500px) {
+    .panel-medium-size {
+        width: 100%;
+        margin-left: 0px;
+    }
+}

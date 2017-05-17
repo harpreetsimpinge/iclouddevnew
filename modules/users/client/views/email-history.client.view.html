@@ -1,0 +1,153 @@
+<section ng-controller="emailshistory">
+  <div class="row white-bg-op">
+    <div class="col-md-12">
+      <h1>Email History</h1>
+    </div>
+    <div class="col-md-12">
+      <div class="col-md-offset-2 col-md-1">
+        <strong>Search</strong>
+      </div>
+      <div class="col-md-4">
+        <input class="form-control" type="text" ng-model="search" placeholder="Search" ng-change="searchAndDisplay()" />
+      </div>
+    </div>
+    <div class="col-md-12 margin-top-20">
+      <div class="col-md-1">
+        Forward
+      </div>
+      <div class="col-md-1">
+        <a href="#" ng-click="sortType = 'LastnameContact.value'; sortReverse = !sortReverse">
+          Date
+          <span ng-show="sortType === 'date'" class="fa " ng-class="sortReverse? 'fa-caret-up' : 'fa-caret-down'"></span>
+        </a>
+      </div>
+      <div class="col-md-2">
+        <strong>To</strong>
+      </div>
+      <div class="col-md-2">
+        <strong>cc</strong>
+      </div>
+      <div class="col-md-1">
+        <strong>bcc</strong>
+      </div>
+      <div class="col-md-2">
+        <strong>Subject</strong>
+      </div>
+      <div class="col-md-2">
+        <strong>Content</strong>
+      </div>
+      <div class="col-md-1" ng-if="authentication.roles === 'admin'">
+        <strong>Employee</strong>
+      </div>
+      <div class="col-md-1">
+        <strong>Delete</strong>
+      </div>
+    </div>
+    <div class="col-md-12 emailList" ng-repeat="item in emails |  orderBy:sortType:!sortReverse track by $index">
+      <div class="col-md-1" ng-click="emailDialog(item)">
+        Forward
+      </div>
+      <div class="email-width">
+        {{item.date | date: "MM/dd/yy"}}
+      </div>
+      <div class="col-md-2 no-overflow">
+        {{item.to}}
+      </div>
+      <div class="col-md-2 no-overflow">
+        {{item.cc}}
+      </div>
+      <div class="col-md-2 no-overflow">
+        {{item.bcc}}
+      </div>
+      <div class="col-md-1 no-overflow">
+        {{item.title}}
+      </div>
+      <div class="col-md-2 no-overflow text-center" ng-mouseover="allcontent = true" ng-mouseleave="allcontent = false" ng-click="stayon = !stayon">
+        <i class="fa fa-arrow-down btn" aria-hidden="true" ng-class=" stayon ? 'btn-warning' : 'btn-primary' "></i>
+      </div>
+      <div class="col-md-1">
+        <i class="fa fa-trash-o btn btn-danger pull-right" aria-hidden="true" ng-click="allcontent = false; stayon = false; deleteEmail($index); emails.splice($index, 1);"></i>
+      </div>
+      <div class="col-md-2" ng-if="authentication.roles === 'admin'">
+        {{item.user.displayName}}
+      </div>
+      <div class="col-md-12 box margin-top-20" ng-show="allcontent || stayon">
+        <div class="col-md-4">
+          <b>To:</b> {{item.to}}
+        </div>
+        <div class="col-md-4">
+          <b>cc:</b> {{item.cc}}
+        </div>
+        <div class="col-md-4">
+          <b>bcc:</b> {{item.bcc}}
+        </div>
+        <div class="col-md-12 margin-top-20">
+          <pre ng-bind-html="item.content"></pre>
+        </div>
+        <div class="col-md-2 margin-top-20 margin-20-buttom">
+          <button class="btn btn-danger" ng-click="deleteEmail($index); emails.splice($index, 1);">DELETE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script type="text/ng-template" id="emailTemplate">
+  <div class="row">
+    <div class="col-md-12">
+      <h2>Send note by Email</h2>
+    </div>
+    <form novalidate name="emailNote">
+      <div class="col-md-12">
+        <div class="col-md-4 form-group">
+          <label for="exampleInputEmail1">Email</label>
+          <input type="email" class="form-control" ng-model="note.to" required pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+        </div>
+        <div class="col-md-4 form-group">
+          <label for="exampleInputEmail1">cc</label>
+          <input type="text" class="form-control" ng-model="note.cc">
+        </div>
+        <div class="col-md-4 form-group">
+          <label for="exampleInputEmail1">bcc</label>
+          <input type="text" class="form-control" ng-model="note.bcc">
+        </div>
+        <div class="col-md-8">
+          <label for="exampleInputEmail1">Subject</label>
+          <input type="text" class="form-control" ng-model="note.title" required>
+        </div>
+        <div class="col-md-4">
+          <label for="exampleInputEmail1">Attachments</label>
+          <br>
+          <fieldset>
+            <div class="text-center form-group">
+              <div class="btn btn-default btn-file form-control">
+                Add File
+                <input type="file" nv-file-select uploader="uploader" class="form-control" required>
+              </div>
+            </div>
+            <div class="text-center form-group">
+              <ul class="list-group">
+                <li ng-repeat="file in emailAttachment track by $index" class="list-group-item">{{file.originalName}} <i class="fa fa-minus btn btn-danger pull-right" ng-click="removeAttachment($index)"></i></li>
+              </ul>
+            </div>
+            <div class="text-center form-group" ng-show="loadFile">
+              <i class="fa fa-spinner fa-spin"></i>
+            </div>
+          </fieldset>
+        </div>
+        <div class="col-md-1">
+          <label for="exampleInputEmail1">Print</label>
+          <br>
+          <button class="btn btn-info" ng-click="printDiv(note)">Print <i class="fa fa-print"></i></button>
+        </div>
+        <div class="col-md-12">
+          <h4>Content</h4>
+          <div text-angular ng-model="note.content" class=""></div>
+          </textarea>
+        </div>
+      </div>
+      <div class="col-md-12 form-group text-center">
+        <button class="btn btn-success" ng-click="sendEmail()" ng-disabled="emailNote.$invalid">Send Email</button>
+      </div>
+      </for>
+  </div>
+</script>

@@ -1,0 +1,72 @@
+@media (min-width: 992px) {
+  .nav-users {
+    position: fixed;
+  }
+}
+.social-account-container {
+  display: inline-block;
+  position: relative;
+}
+.btn-remove-account {
+  top: 10px;
+  right: 10px;
+  position: absolute;
+}
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+.btn-file input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  background: white;
+  cursor: inherit;
+  display: block;
+}
+.user-profile-picture {
+  min-height: 150px;
+  max-height: 150px;
+}
+
+.email-width{
+    width: 56px;
+    float: left;
+}
+
+.box{
+    background: #C5C5C5;
+    border: 1px solid #807E7E;
+}
+
+.margin-20-buttom{
+    margin-bottom: 20px;
+}
+
+.no-overflow{
+    overflow: hidden;
+}
+
+.margin-60-top{
+    margin-top: 60px;
+}
+
+.margin-110-top{
+    margin-top: 110px;
+}
+
+.float-left{
+    float: left;
+}
+
+.search-box{
+    margin: 20px 0px 20px 0px;
+    border: 1px solid #A5A5A5;
+    padding: 8px 0px 10px 0px;
+}

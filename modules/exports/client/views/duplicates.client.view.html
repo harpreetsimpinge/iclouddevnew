@@ -1,0 +1,29 @@
+<section ng-controller="DoplicatesController">
+
+  <div class="row">
+    <div class="col-md-12" ng-if="load">
+      <h1>Duplicates</h1>
+      <div class="col-md-6" ng-repeat="first in list">
+        <ul  ng-repeat="last in first" class="margin20top dup-box">
+          <li  ng-repeat="item in last track by $index" class="list-group-item" ng-mouseenter="hover = true" ng-mouseleave="hover = false">
+            {{item.FirstnameContact.value}} {{item.LastnameContact.value}}
+            <i class="fa fa-minus btn btn-danger pull-right" ng-click="delete(item); last.splice($index, 1);"></i>
+            <div class="float-box" ng-if="hover">
+              <b>Name :</b> {{item.FirstnameContact.value}} {{item.LastnameContact.value}}<br>
+              <b>Claim # :</b>{{item.ClaimContact.value}}<br>
+              <b>DOI :</b>{{item.DOIContact.value |  date: "MM/dd/yy"}}<br>
+              <b>Company  :</b>{{item.CompanyNameClaimsRepresentative.value}}<br>
+              <b>Referral Date :</b>{{item.DateofreferralFocusInformation.value |  date: "MM/dd/yy"}}<br>
+            </div>
+          </li>
+          </ul>
+      </div>
+    </div>
+    <div class="col-md-4 col-md-offset-4 margin20top">
+      <center>
+        <i class="fa fa-spinner fa-spin"></i><br>
+        <b>Loading Duplicates</b>
+      </center>
+    </div>
+  </div>
+</section>

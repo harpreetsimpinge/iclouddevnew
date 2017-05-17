@@ -1,0 +1,264 @@
+<section ng-controller="filelist">
+  <div class="white-bg-op row" nv-file-drop="" uploader="uploader" ng-mouseover="changeUploadType('newLibraryFile',{type:['library']})">
+    <div class="co-md-12">
+      <h1 style="margin-left: 15px;">Dropdoc</h1>
+    </div>
+    <div class="col-md-12 margin-20-buttom">
+      <div class="col-md-12 dragndrop">
+        <div nv-file-select uploader="uploader">
+          <spam ng-show="!loadFile">Drop Zone</span>
+            <div class="text-center form-group" ng-show="loadFile">
+              <i class="fa fa-spinner fa-spin"></i>
+            </div>
+        </div>
+      </div>
+      <div class="col-md-offset-4 col-md-4" ng-if="uploader.queue.length > 0">
+        <div class="col-md-12">
+          <strong>Title</strong>
+          <input type="text" ng-model="uploadTitle" class="form-control">
+        </div>
+        <div class="col-md-12">
+          <strong>Description</strong>
+          <textarea ng-model="uploadText" class="form-control"></textarea>
+        </div>
+        <div class="col-md-12 margin-20-top">
+          <button class="btn btn-info form-control" ng-click="sendUpload()">Upload</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 margin-20-buttom" style="padding-top: 10px;">
+      <div class="col-md-1 col-md-offset-4">
+        Open/Close
+      </div>
+      <div class="col-md-2">
+        <select ng-model="closed" class="form-control" ng-change="getFiles(closed)">
+          <option value="false" selected="selected">Only Open</option>
+          <option value="true">Include Closed</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-12 panel" ng-repeat="group in files" ng-init="parentIndex = $index" style="background: none">
+      <div class=" panel-primary" style="background:#fff">
+        <div class="panel-heading" style="min-height: 80px">
+          <div class="col-md-2">
+            <h3 class="capitalize">{{types[parentIndex]}}</h3>
+          </div>
+          <div class="col-md-3" style="padding-top: 10px;">
+            <div class="input-group">
+              <input type="text" class="btn" ng-model="value" placeholder="Search" ng-change="">
+              <span class="input-group-btn">
+                <button class="btn btn-secondary" ng-click="searchAndDisplay(value, parentIndex)" type="button">Search</button>
+              </span>
+            </div>
+          </div>
+          <div class="col-md-7" style="padding-left: 10px;">
+            <nav>
+              <ul class="pagination">
+                <li ng-click="dropdocPrev(parentIndex)">
+                  <a href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                <li ng-repeat="n in [] | range: pageLength[parentIndex]"><a href="#" ng-click="seize(n, parentIndex)">{{n+1}}</a></li>
+                <li>
+                  <a href="#" aria-label="Next" ng-click="dropdocNext(parentIndex)">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+          <!--
+          <div class="col-md-1 pull-right" ng-click="showBody = !showBody">
+            <button class="btn btn-info" ng-bind="showBody? 'Close' : 'Open'"></button>
+          </div> -->
+        </div>
+        <div class="panel-body">
+          <div class="margin-20-top">
+            <div class="list-group-item col-md-12 text-center">
+              <div class="col-md-1">
+                <strong>Download</strong>
+              </div>
+              <div class="col-md-2">
+                <strong>File Name</strong>
+              </div>
+              <div class="col-md-2">
+                <a href="#" ng-click="sortType[parentIndex] = 'date'; sortReverse[parentIndex] = !sortReverse[parentIndex]; orderDropdoc(parentIndex, sortReverse[parentIndex], sortType[parentIndex]);">
+                  <strong>Date</strong>
+                  <span ng-show="sortType[parentIndex] === 'date'" class="fa " ng-class="sortReverse[parentIndex]? 'fa-caret-up' : 'fa-caret-down'"></span>
+                </a>
+              </div>
+              <div class="col-md-2">
+                <a href="#" ng-click="sortType[parentIndex] = 'LastModify'; sortReverse[parentIndex] = !sortReverse[parentIndex]; orderDropdoc(parentIndex, sortReverse[parentIndex], sortType[parentIndex]);">
+                  <strong>Last Modify</strong>
+                  <span ng-show="sortType[parentIndex] === 'LastModify'" class="fa " ng-class="sortReverse[parentIndex]? 'fa-caret-up' : 'fa-caret-down'"></span>
+                </a>
+              </div>
+              <div class="col-md-2">
+                <strong>Created By</strong>
+              </div>
+              <div class="col-md-2">
+                <strong>Association</strong>
+              </div>
+              <div class="col-md-1">
+                <strong>Open</strong>
+              </div>
+              <div class="cold-md-2">
+              </div>
+            </div>
+            <div class="col-md-12 file-list text-center" ng-repeat="item in group track by $index">
+              <div class="col-md-1">
+                <a href="{{item.url}}">
+                  <i class="fa fa-download btn btn-info pull-right"></i>
+                </a>
+              </div>
+              <div class="col-md-2 hide-overflow">
+                {{item.originalName}}
+              </div>
+              <div class="col-md-2">
+                {{item.date | date}}
+              </div>
+              <div class="col-md-2">
+                {{item.LastModify | date}}
+              </div>
+              <div class="col-md-2">
+                {{item.user.displayName}}
+              </div>
+              <div class="col-md-2">
+                {{item.case.FirstnameContact.value}} {{item.case.LastnameContact.value}}
+              </div>
+              <div class="col-md-1">
+                <i class="fa fa-level-down btn btn-info" aria-hidden="true" ng-click="openVersions = !openVersions"></i>
+              </div>
+              <div class="col-md-12 versions" ng-show="openVersions">
+                <div class="col-md-6 margin-top-20 margin20-buttom">
+                  <div class="col-md-4" ng-if="item.note">
+                    <button ng-click="eidtNoteDialog(item.note)" class="btn btn-info"> Show Note <i class="fa fa-sticky-note-o" aria-hidden="true"></i> </button>
+                  </div>
+                  <div class="col-md-4">
+                    <button class="btn btn-danger" ng-click="deleteFileDropdoc(item._id, $index)">
+                      <i class="fa fa-trash" aria-hidden="true"></i> Delete File
+                    </button>
+                  </div>
+                  <div class="col-md-4">
+                    <label for="file">
+                      <div class="file-input-wrapper">
+                        <button class="btn-file-input btn">Select File</button>
+                        <input type="file" nv-file-select uploader="uploader" class="form-control" ng-mouseover="changeUploadType('modifyFile',{id: item._id}, parentIndex)" name="file">
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-12 margin-top-20 box text-left" ng-if="types[parentIndex] === 'library'">
+                  <div class="col-md-12">
+                    <strong>Title - </strong> {{item.title}}
+                  </div>
+                  <div class="col-md-12">
+                    <strong>Description - <br></strong> {{item.text}}
+                  </div>
+                </div>
+                <div class="col-md-12 margin-top-20">
+                  <div class="col-md-1">
+                    <strong>Version</strong>
+                  </div>
+                  <div class="col-md-1">
+                    <strong>Download</strong>
+                  </div>
+                  <div class="col-md-2">
+                    <strong>User changed</strong>
+                  </div>
+                  <div class="col-md-2">
+                    <strong>Modification Date</strong>
+                  </div>
+                </div>
+                <div class="col-md-12 line" ng-repeat="ver in item.versions track by $index">
+                  <div class="col-md-1">
+                    {{$index}}
+                  </div>
+                  <div class="col-md-1">
+                    <a href="{{ver.url}}">
+                      <i class="fa fa-download btn btn-info pull-right"></i>
+                    </a>
+                  </div>
+                  <div class="col-md-2">
+                    {{ver.user.displayName}}
+                  </div>
+                  <div class="col-md-2">
+                    {{ver.date | date }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script type="text/ng-template" id="editNoteTemplate">
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      Add Notes <i class="fa fa-level-down"></i>
+    </div>
+    <div class="panel-body">
+      <div class="col-md-6 form-group">
+        <h4>Note Title</h4>
+        <input type="text" class="form-control" ng-model="editNote.title">
+      </div>
+      <div class="col-md-3 form-group">
+        <h4>Note Type</h4>
+        <select ng-model="editNote.type" class="form-control">
+          <option value="closing" class="closingNote">Closing File</option>
+          <option value="email" class="closingNote">Email</option>
+          <option value="employer" class="employerNote">Employer contact</option>
+          <option value="form" class="formNote">Forms</option>
+          <option value="meeting" class="meetingNote">Meeting</option>
+          <option value="other" class="otherNote">Other</option>
+          <option value="phone" class="phoneNote">Phone Call</option>
+          <option value="physician" class="physicianNote">Physician Contact</option>
+          <option value="check" class="checkingNote">Status</option>
+        </select>
+      </div>
+      <div class="col-md3 form-group">
+        <h4>Attachments</h4>
+        <form>
+          <fieldset>
+            <div class="text-center form-group" ng-disabled="loadFile">
+              <div class="btn btn-default btn-file form-control">
+                Add File
+                <input type="file" nv-file-select uploader="uploader" class="form-control" ng-mouseover="changeUploadType('addFileNote',{note: editNote._id, case: editArticleId}, parentIndex)">
+              </div>
+            </div>
+            <div class="text-center form-group" ng-show="loadFile">
+              <i class="fa fa-spinner fa-spin"></i>
+            </div>
+            <ul class="list-group">
+              <li ng-repeat="file in editNote.files track by $index" class="list-group-item">{{file.originalName}} <i class="fa fa-minus btn btn-danger pull-right" ng-click="editNote.files.splice($index,1);"></i></li>
+            </ul>
+          </fieldset>
+        </form>
+      </div>
+      <div class="col-md-6 form-group">
+        <h4>Note Date</h4>
+        <md-content class="md-hue-1">
+          <md-datepicker class="form-control date-picker" ng-model="editNote.date" is-open="$parent.opened"></md-datepicker>
+        </md-content>
+      </div>
+      <div class="col-md-6 form-group">
+        <h4>Follow Up Date</h4>
+        <md-content class="md-hue-1">
+          <md-datepicker class="form-control date-picker" type="text" ng-model="editNote.followup" is-open="$parent.opened"></md-datepicker>
+        </md-content>
+      </div>
+      <div class="col-md-12 input-height">
+        <h4>Description</h4>
+        <!-- <textarea ng-model="newNote.text" class="form-control" rows="12"></textarea> -->
+        <div text-angular ng-model="editNote.content" class=""></div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button type="submit" class="btn btn-primary center-block" ng-disabled="loadFile" ng-click="updateNote(newNoteForm.$invalid)">Save</button>
+    </div>
+  </div>
+  <!-- end of panel -->
+</script>

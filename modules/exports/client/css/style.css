@@ -1,0 +1,107 @@
+.ngdialog.ngdialog-theme-default .ngdialog-content {  
+    width: 1000px;
+}
+.phoneNote{
+    background: rgba(58,135,173,.7);
+}
+
+.emailNote{
+    background: rgba(230, 144, 144, 0.7);
+}
+
+.followupNote{
+    background: rgba(185, 80, 80, 0.7);
+}
+
+.meetingNote{
+    background: rgba(214, 199, 127, 0.7);;
+}
+
+.otherNote{
+    background: rgba(126, 222, 147, 0.7);
+}
+
+.checkingNote{
+    background: rgba(197,70,176,0.7)
+}
+
+
+.newInfoNote{
+    background: #F06292;   
+}
+
+.bottom {
+	border-bottom: 1px solid #ccc;
+}
+
+.fc-event.fc-draggable {
+    border: none;
+}
+
+.todayNotesHeader{
+    background: rgba(128, 128, 128, 0.52);
+    border-bottom: 2px solid;
+}
+
+.todayNoteList md-list-item{
+    padding-top: 15px;
+}
+
+.shadow{
+    -webkit-box-shadow: 7px 13px 20px 0px rgba(153,153,153,0.7);
+    -moz-box-shadow: 7px 13px 20px 0px rgba(153,153,153,0.7);
+    box-shadow: 7px 13px 20px 0px rgba(153,153,153,0.7);
+}
+
+.margin20top{
+    margin-top: 20px;
+}
+
+.margin40top{
+    margin-top: 40px;
+}
+
+.margin20-buttom{
+    margin-bottom: 20px;
+}
+
+.spin{
+    width: 400px;
+    margin: 140px auto;
+    text-align: center;
+    font-size: 51px;
+    color: #1966FF;
+
+}
+
+.emailList{
+    margin: 5px 0px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #CACACA;
+}
+
+.emailList .col-md-2, .col-md-3 , .col-md-4{
+    overflow: hidden;
+}
+
+.dup-box{
+    //border: 1px solid #000;
+    border-radius: 4px;
+}
+
+.float-box{
+    height: 100px;
+    width: 400px;
+    border: 1px solid #000;
+    position: absolute;
+    z-index: 999;
+    background: #fff;
+}
+
+.height60{
+    height: 60px;
+}
+
+.height140{
+    height: 140px;
+}

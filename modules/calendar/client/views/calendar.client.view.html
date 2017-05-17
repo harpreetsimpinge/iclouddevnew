@@ -1,0 +1,259 @@
+<section ng-controller="CalendarController" data-ng-init="getFollowUp()" class="panel-medium-size">
+  <div class="page-header">
+    <h1>Calendar</h1>
+  </div>
+  <div class="row margin20-buttom">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        Calendar
+      </div>
+      <div class="panel-body">
+        <div ui-calendar="uiConfig.calendar" class="shadow" ng-model="eventSources" calendar="myCalendar" id="test"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-primary" ng-if="currentFU.status">
+    <div class="panel-heading">
+      Followup Information
+    </div>
+    <div class="panel-body">
+      <div class="col-md-12 todayNotesHeader">
+        <div class="col-md-1">
+          <strong>Attach</strong>
+        </div>
+        <div class="col-md-1">
+          <strong>Check</strong>
+        </div>
+        <div class="col-md-1">
+          <strong>Type</strong>
+        </div>
+        <div class="col-md-1">
+          <strong>Email</strong>
+        </div>
+        <div class="col-md-2">
+          <strong>Title</strong>
+        </div>
+        <div class="col-md-1">
+          <strong>Claim</strong>
+        </div>
+        <div class="col-md-2">
+          <strong>Full Name</strong>
+        </div>
+        <div class="col-md-1">
+          <strong>Date</strong>
+        </div>
+        <div class="col-md-1">
+          <strong>Followup</strong>
+        </div>
+      </div>
+      <div class="col-md-12 padding10top height55 {{currentFU.class}}" id="{{currentFU._id}}" ng-click="changeSideId(currentFU._case._id);">
+        <div class="col-md-1">
+          <i class="fa fa-file-o btn btn-info" ng-click="showLinks = !showLinks" ng-show="currentFU.files.length !== 0"></i>
+          <div class="links-popup" ng-show="showLinks === true">
+            <ul class="list-group">
+              <li ng-repeat="file in currentFU.id.files track by $index" class="list-group-item inline">
+                {{file.originalName}}
+                <a href="{{file.url}}">
+                  <i class="fa fa-download btn btn-info pull-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-1">
+          <i class="btn fa" ng-class="currentFU.status === 'close' ? 'fa-check otherNote' : 'btn-disable fa-check'" ng-click="changeStatus2(currentFU._id)"></i>
+        </div>
+        <div class="col-md-1" ng-click="showContent = !showContent"> <b>{{currentFU.id.type}}</b>
+          <!-- <i class="fa btn btn-primary" ng-class="currentFU.id.type === 'phone' ? 'fa-phone'"></i> -->
+        </div>
+        <div class="col-md-1" ng-click="emailDialog(currentFU.id)">
+          <i class="fa fa-envelope btn btn-info"></i>
+        </div>
+        <div class="col-md-2" ng-click="showContent = !showContent">
+          <strong>{{ currentFU.id.title }}</strong>
+        </div>
+        <div class="col-md-1" ng-click="showContent = !showContent">
+          <strong>{{ currentFU._case.ClaimContact.value }}</strong>
+        </div>
+        <div class="col-md-2" ng-click="showContent = !showContent">
+          {{currentFU._case.FirstnameContact.value}} {{currentFU._case.LastnameContact.value}}
+        </div>
+        <div class="col-md-1" ng-click="showContent = !showContent">
+          {{currentFU.id.date | date: "MM/dd/yy"}}
+        </div>
+        <div class="col-md-1" ng-click="showContent = !showContent">
+          {{currentFU.date | date: "MM/dd/yy"}}
+        </div>
+        <div class="col-md-12 margin20top" ng-if="showContent">
+          <pre ng-bind-html="currentFU.id.content"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-primary" style="display: none">
+    <div class="panel-heading">
+      Date Picker
+    </div>
+    <div class="panel-body">
+      <div class="col-md-4">
+        <strong>Pick a date</strong>
+        <md-datepicker ng-model="datepicker" md-placeholder="Enter date" ng-change="getNotesByDate();"></md-datepicker>
+      </div>
+      <div class="col-md-3">
+        <input class="form-control" type="text" ng-model="search" placeholder="Search" ng-change="searchAndDisplay()" />
+      </div>
+      <div class="col-md-12" ng-if="todayNotes.length !== 0">
+        <div class="todayNoteList shadow">
+          <md-list-item class="md-3-line bottom todayNotesHeader">
+            <div class="col-md-1">
+              <strong>Delete</strong>
+            </div>
+            <div class="col-md-1">
+              <strong>Status</strong>
+            </div>
+            <div class="col-md-1">
+              <strong>File</strong>
+            </div>
+            <div class="col-md-1">
+              <strong>Type</strong>
+            </div>
+            <div class="col-md-1">
+              <strong>Email</strong>
+            </div>
+            <div class="col-md-2">
+              <strong>Note Title</strong>
+            </div>
+            <div class="col-md-1">
+              <strong>Claim ID</strong>
+            </div>
+            <div class="col-md-2">
+              <strong>Full Name</strong>
+            </div>
+            <div class="col-md-1">
+              <strong>Note Date</strong>
+            </div>
+            <div class="col-md-1">
+              <strong>Follow Up Date</strong>
+            </div>
+          </md-list-item>
+          <div class="col-md-12 padding10top height55 {{item.class}}" ng-repeat="item in todayNotes track by $index" id="{{item._id}}" ng-click="showContent = !showContent; changeSideId(item._case._id)" ng-if="item.status === 'open'">
+            <div class="col-md-1">
+              <i class="btn btn-danger fa fa-trash" ng-click="deleteNote(item._id)"></i>
+            </div>
+            <div class="col-md-1">
+              <i class="btn fa" ng-class="item.status === 'close' ? 'fa-check otherNote' : 'btn-disable fa-check'" ng-click="changeStatus(item._id, $index)"></i>
+            </div>
+            <div class="col-md-1">
+              <i class="fa fa-file-o btn btn-info" ng-click="showLinks = !showLinks" ng-show="item.files.length !== 0"></i>{{downloadList}}
+              <div class="links-popup" ng-show="showLinks === true">
+                <ul class="list-group">
+                  <li ng-repeat="file in item.files track by $index" class="list-group-item inline">
+                    {{file.originalName}}
+                    <a href="{{file.url}}">
+                      <i class="fa fa-download btn btn-info pull-right"></i>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <i class="fa {{item.icon}} btn btn-primary"></i>
+            </div>
+            <div class="col-md-1" ng-click="emailDialog(item)">
+              <i class="fa fa-envelope btn btn-info"></i>
+            </div>
+            <div class="col-md-2">
+              <strong>{{ item.title }}</strong>
+            </div>
+            <div class="col-md-1">
+              <strong>{{ item._case.ClaimContact.value }}</strong>
+            </div>
+            <div class="col-md-2">
+              {{item._case.FirstnameContact.value}} {{item._case.LastnameContact.value}}
+            </div>
+            <div class="col-md-1">
+              {{item.date | date: "MM/dd/yy"}}
+            </div>
+            <div class="col-md-1">
+              {{item.followUp | date: "MM/dd/yy"}}
+            </div>
+            <div class="col-md-12 margin20top" ng-if="showContent">
+              <pre ng-bind-html="item.content"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="placment">
+    <span my-draggable article="sideArticleId"></span>
+  </div>
+  <div add-note article="sideArticleId"></div>
+</section>
+<script type="text/ng-template" id="emailTemplate">
+  <div class="row">
+    <div class="col-md-12">
+      <h2>Send note by Email</h2>
+    </div>
+    <form novalidate name="emailNote">
+      <div class="col-md-12">
+        <div class="col-md-4 form-group">
+          <label for="exampleInputEmail1">Email</label>
+          <input type="email" class="form-control" ng-model="note.to" required id="email" pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+        </div>
+        <div class="col-md-4 form-group">
+          <label for="exampleInputEmail1">cc</label>
+          <input type="text" class="form-control" ng-model="note.cc" id="cc" name="cc">
+        </div>
+        <div class="col-md-4 form-group">
+          <label for="exampleInputEmail1">bcc</label>
+          <input type="text" class="form-control" ng-model="note.bcc" id="bcc" name="bcc">
+        </div>
+        <div class="col-md-7">
+          <label for="exampleInputEmail1">Subject</label>
+          <input type="text" class="form-control" ng-model="note.title" name="title" required>
+        </div>
+        <div class="col-md-4">
+          <label for="exampleInputEmail1">Attachments</label>
+          <br>
+          <fieldset>
+            <button class="btn form-control btn-info" ng-click="showSearch = !showSearch">
+              Search File
+            </button>
+            <div class="float-search" ng-if="showSearch">
+              <search-doc user="{{note._case}}" callback="onFile"></search-doc>
+            </div>
+            <div class="text-center form-group">
+              <div class="btn btn-default btn-file form-control">
+                Add File
+                <input type="file" nv-file-select uploader="uploader" class="form-control" required>
+              </div>
+            </div>
+            <div class="text-center form-group">
+              <ul class="list-group">
+                <li ng-repeat="file in emailAttachment track by $index" class="list-group-item">{{file.originalName}} <i class="fa fa-minus btn btn-danger pull-right" ng-click="removeAttachment($index)"></i></li>
+              </ul>
+            </div>
+            <div class="text-center form-group" ng-show="loadFile">
+              <i class="fa fa-spinner fa-spin"></i>
+            </div>
+          </fieldset>
+        </div>
+        <div class="col-md-1">
+          <label for="exampleInputEmail1">Print</label>
+          <br>
+          <button class="btn btn-info" ng-click="printDiv(note)">Print <i class="fa fa-print"></i></button>
+        </div>
+        <div class="col-md-12">
+          <h4>Content</h4>
+          <text-angular-toolbar name="toolbar1" ta-toolbar="[['undo','redo'],['justifyLeft','justifyCenter','justifyRight'],['h1','h2','h3'],['bold','italics','underline','strikeThrough'],['colourBlack','colourRed','colourGrey','colourGreen','colourBlue'],['ul','ol','insertLink'],['p','pre','quote']]"></text-angular-toolbar>
+          <div text-angular ng-model="note.content" class="" ta-target-toolbars='toolbar1'></div>
+          </textarea>
+        </div>
+      </div>
+      <div class="col-md-12 form-group text-center">
+        <button class="btn btn-success" ng-click="sendEmail(note)" ng-disabled="emailNote.$invalid">Send Email</button>
+      </div>
+      </for>
+  </div>
+</script>

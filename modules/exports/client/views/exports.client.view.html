@@ -1,0 +1,76 @@
+<section ng-controller="ExportsController">
+  
+  <div class="row margin40top">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        Date Picker
+      </div>
+      <div class="panel-body">
+        <div class="col-md-12">
+          <strong>Pick a date</strong> <md-datepicker ng-model="datepicker" md-placeholder="Enter date" ng-change="getNotesByDate(); getFollowUpByDate();"></md-datepicker>   
+        </div>
+        <div class="col-md-12">
+        <md-list class="todayNoteList shadow">
+          <md-list-item class="md-3-line bottom todayNotesHeader">
+            <div class="col-md-1">
+              <strong>Delete</strong>
+            </div>
+            <div class="col-md-1">
+              File
+            </div>
+            <div class="col-md-1 text-right">
+              <strong>Type</strong>
+            </div>
+            <div class="col-md-3">
+              <div class="md-list-item-text" layout="column">
+                <h3><strong>Note Title</strong></h3>
+                <h4>Note Date</h4>
+                <p>Note Content</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <strong>Full Name | Injury - DOI </strong>
+            </div>
+          </md-list-item>
+          <md-list-item class="md-3-line bottom {{item.class}}" ng-repeat="item in todayNotes" id="{{item._id}}">
+            <div class="col-md-1">
+              <i class="fa fa-trash" ng-click="deleteNote(item._id)"></i>
+            </div>
+            <div class="col-md-1">
+              <a href="{{item.url}}" download><i class="fa fa-file-o" ng-if="item.url!==''"></i></a>
+            </div>
+            <div class="col-md-1 text-right">
+              <i class="fa {{item.icon}}" ng-class=""></i>
+            </div>
+            <div class="col-md-3">
+              <div class="md-list-item-text" layout="column">
+                <h3><strong>{{ item.title }}</strong></h3>
+                <h4>{{ item.date | date}}</h4>
+                <p>{{ item.content }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              {{item._case.lastName}} {{item._case.middleName}} {{item._case.firstName}} | {{item._case.injury}} -  {{item._case.doi | date}}
+            </div>
+          </md-list-item>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="page-header">
+    <h1>Calendar</h1>
+  </div>
+  <div class="row margin20-buttom">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        Calendar
+      </div>
+      <div class="panel-body">
+        <div ui-calendar="uiConfig.calendar" class="shadow" ng-model="eventSources" calendar="myCalendar" id="test"></div> 
+      </div>
+    </div>
+    
+  </div>
+</section>

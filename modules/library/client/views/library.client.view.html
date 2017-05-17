@@ -1,0 +1,104 @@
+<section ng-controller="libraryController">
+  <div class="row margin40top">
+    <form name="newJobForm">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          Add New Job
+        </div>
+        <div class="panel-body">
+          <div class="col-md-6 col-md-offset-3 panel panel-info padding25top">
+            <div class="col-md-7 form-group">
+              <input type="text" class="form-control" ng-model="newJob.title" class="form-control" maxlength="65" required>
+            </div>
+            <div class="col-md-4 form-group">
+              <fieldset ng-if="!file">
+                <div class="text-center form-group" ng-hide="uploader.queue.length">
+                  <div class="btn btn-default btn-file form-control">
+                    Add File
+                    <input type="file" nv-file-select uploader="uploader" class="form-control" required>
+                  </div>
+                </div>
+                <div class="text-center form-group" ng-show="uploader.queue.length && !loadFile && !loadSuccess">
+                  <button class="btn btn-primary" ng-click="uploadFile();">Upload</button>
+                  <button class="btn btn-default" ng-click="cancelUpload();">Cancel</button>
+                </div>
+                <div class="text-center form-group" ng-show="loadSuccess && uploader.queue.length">
+                  <b>File is ready</b>
+                </div>
+                <div class="text-center form-group" ng-show="loadFile">
+                  <i class="fa fa-spinner fa-spin"></i>
+                </div>
+              </fieldset>
+              <span ng-if="file">
+                <b>File Ready</b>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer">
+          <button class="form-control btn btn-primary" ng-click="addJob()" ng-disabled="newJobForm.$invalid">Add Job</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="row">
+    <div class='panel panel-primary'>
+      <div class='panel-heading'>
+        Jobs Library
+      </div>
+      <div class='panel-body'>
+        <div class="col-md-6 col-md-offset-3" style="margin-top: 2em">
+          <input class="form-control" type="text" ng-model="search" placeholder="Search" ng-change="searchAndDisplay()" />
+        </div>
+        <div class="col-md-12">
+          <div class="col-md-8 col-md-offset-2 margin40top margin20-buttom">
+            <div class="col-md-6">
+              <strong>Title</strong>
+            </div>
+            <div class="col-md-2">
+              <strong>File</strong>
+            </div>
+            <div class="col-md-2">
+              <strong>View</strong>
+            </div>
+            <div class="col-md-2">
+              <strong>Delete</strong>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <ul class="list-group">
+            <li class="list-group-item" ng-repeat="job in jobs | orderBy : 'title'" id="{{job._id}}}">
+              <div class="col-md-8 col-md-offset-2">
+                <div class="col-md-6">
+                  {{job.title}}
+                </div>
+                <div class="col-md-2">
+                  <a href="{{job.file}}" download>
+                    <i class="fa fa-file-o btn btn-info" ng-if="job.file !==''"></i>
+                  </a>
+                </div>
+                <div class="col-md-2">
+                  <a class="btn btn-primary" ng-click="showPdfDialog(job.file)" ng-if="checkIfPdf(job.file)">
+                    <i class="fa fa-file-pdf-o"></i>
+                  </a>
+                </div>
+                <div class="col-md-2">
+                  <a class="btn btn-danger" ng-click="deleteJob(job)">
+                    <i class="fa fa-trash"></i>
+                  </a>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  </script>
+  <script type="text/ng-template" id="PdfTemplate">
+    <div class="panel panel-primary">
+      <h1 ng-if="loadingPdf"> Loading PDF </h1>
+      <iframe src="{{url}}" style="width:100%; height:700px;" frameborder="0" type="application/pdf"></iframe>
+    </div>
+  </script>

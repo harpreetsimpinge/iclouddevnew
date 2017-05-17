@@ -1,0 +1,12 @@
+<section ng-controller="HomeController">
+  <div class="row">
+    <div class="col-md-7 col-md-offset-2 mainBlock">
+      <img src="/modules/core/client/img/brand/logo.jpg" class="img-responsive" />
+      <div class="jumbotron" ng-if="authentication.user === ''" style='background: none;'>
+        <p>Claimant Management System</p>
+        <p><a class="btn btn-primary btn-lg" ui-sref="authentication.signup" role="button">Sign Up</a> or <a class="btn btn-primary btn-lg" ui-sref="authentication.signin" role="button">Sign In</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
